@@ -1,6 +1,69 @@
 """Pydantic schemas package for SahyogX."""
 from src.schemas.user import UserRole, UserBase, UserResponse
 from src.schemas.auth import Token, TokenPayload, LoginRequest
+from src.schemas.personnel import (
+    PersonnelCreate,
+    PersonnelUpdate,
+    PersonnelResponse,
+    PersonnelListResponse,
+)
+from src.schemas.deployment import (
+    DeploymentCreate,
+    DeploymentUpdate,
+    DeploymentResponse,
+    DeploymentListResponse,
+)
+from src.schemas.duty import (
+    DutyCreate,
+    DutyUpdate,
+    DutyResponse,
+    DutyListResponse,
+    DutyWorkloadSummary,
+)
+from src.schemas.leave import (
+    LeaveCreate,
+    LeaveUpdate,
+    LeaveResponse,
+    LeaveListResponse,
+)
+from src.schemas.survey import (
+    SurveyCreate,
+    SurveyUpdate,
+    SurveyResponse,
+    SurveyListResponse,
+    SurveyAggregationResponse,
+)
+
+from src.schemas.prediction import (
+    RiskCategory,
+    PredictionSource,
+    RiskFactor,
+    PersonnelStressFeatures,
+    StressPredictionResponse,
+    UnitStressRiskSummary,
+    ModelStatusResponse,
+)
+from src.schemas.alert import (
+    AlertStatus,
+    AlertSeverity,
+    AlertTriggerType,
+    InterventionRecommendation,
+    AlertCreate,
+    AlertUpdate,
+    AlertResolutionPayload,
+    AlertResponse,
+    AlertListResponse,
+    AlertScanRequest,
+    AlertScanResult,
+)
+from src.schemas.analytics import (
+    RiskBreakdown,
+    UnitHeatmapItem,
+    UnitHeatmapResponse,
+    TheatreRiskMetric,
+    TheatreRiskResponse,
+    UnitWelfareSummary,
+)
 
 __all__ = [
     "UserRole",
@@ -9,4 +72,50 @@ __all__ = [
     "Token",
     "TokenPayload",
     "LoginRequest",
+    "PersonnelCreate",
+    "PersonnelUpdate",
+    "PersonnelResponse",
+    "PersonnelListResponse",
+    "DeploymentCreate",
+    "DeploymentUpdate",
+    "DeploymentResponse",
+    "DeploymentListResponse",
+    "DutyCreate",
+    "DutyUpdate",
+    "DutyResponse",
+    "DutyListResponse",
+    "DutyWorkloadSummary",
+    "LeaveCreate",
+    "LeaveUpdate",
+    "LeaveResponse",
+    "LeaveListResponse",
+    "SurveyCreate",
+    "SurveyUpdate",
+    "SurveyResponse",
+    "SurveyListResponse",
+    "SurveyAggregationResponse",
+    "RiskCategory",
+    "PredictionSource",
+    "RiskFactor",
+    "PersonnelStressFeatures",
+    "StressPredictionResponse",
+    "UnitStressRiskSummary",
+    "ModelStatusResponse",
+    "AlertStatus",
+    "AlertSeverity",
+    "AlertTriggerType",
+    "InterventionRecommendation",
+    "AlertCreate",
+    "AlertUpdate",
+    "AlertResolutionPayload",
+    "AlertResponse",
+    "AlertListResponse",
+    "AlertScanRequest",
+    "AlertScanResult",
+    "RiskBreakdown",
+    "UnitHeatmapItem",
+    "UnitHeatmapResponse",
+    "TheatreRiskMetric",
+    "TheatreRiskResponse",
+    "UnitWelfareSummary",
 ]

@@ -75,6 +75,11 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
+    # ML Bridge & Stress Predictor Settings (Phase 3)
+    ML_MODEL_DIR: str = "artifacts/models"
+    ML_MODEL_PATH: Optional[str] = None
+    ML_FALLBACK_TO_HEURISTIC: bool = True
+
     @computed_field
     @property
     def ASYNC_DATABASE_URI(self) -> str:

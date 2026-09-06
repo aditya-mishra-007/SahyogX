@@ -9,7 +9,7 @@ from alembic import context
 
 # Import project settings and base metadata
 from src.core.config import settings
-from src.models.base import Base
+from src.models import Base
 
 # Alembic Config object
 config = context.config

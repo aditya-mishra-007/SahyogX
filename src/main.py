@@ -91,10 +91,12 @@ async def validation_exception_handler(
     request: Request, exc: RequestValidationError
 ) -> JSONResponse:
     """Handles request validation errors with sanitized field details."""
+    from fastapi.encoders import jsonable_encoder
+
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={
-            "detail": exc.errors(),
+            "detail": jsonable_encoder(exc.errors()),
             "message": "Validation failed for request parameters",
         },
     )
