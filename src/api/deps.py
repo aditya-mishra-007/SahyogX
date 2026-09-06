@@ -2,12 +2,13 @@ from typing import Callable
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 import jwt
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import settings
 from src.core.database import get_db
 from src.core.security import decode_access_token
 from src.schemas.user import UserResponse, UserRole
-from src.services.auth_service import get_user_by_username
+from src.services.auth_service import get_user_from_db_or_dev
 
 # OAuth2 scheme configured for Swagger UI Bearer Authorization
 oauth2_scheme = OAuth2PasswordBearer(
@@ -18,10 +19,14 @@ oauth2_scheme = OAuth2PasswordBearer(
 )
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserResponse:
+async def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db),
+) -> UserResponse:
     """
     Decodes the JWT access token, validates claims and user existence,
     and returns the authenticated UserResponse object.
+    Checks PostgreSQL database users table with in-memory fallback.
     Raises HTTP 401 Unauthorized if invalid or expired.
     """
     credentials_exception = HTTPException(
@@ -37,7 +42,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserResponse:
     except (jwt.PyJWTError, Exception):
         raise credentials_exception
 
-    user = get_user_by_username(username)
+    user = await get_user_from_db_or_dev(db, username)
     if user is None or not user.is_active:
         raise credentials_exception
 

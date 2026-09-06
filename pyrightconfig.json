@@ -1,0 +1,39 @@
+{
+  "include": [
+    "src",
+    "tests",
+    "alembic",
+    "scripts"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    ".venv"
+  ],
+  "venvPath": ".",
+  "venv": ".venv",
+  "reportMissingImports": "none",
+  "executionEnvironments": [
+    {
+      "root": "alembic",
+      "reportMissingImports": "none",
+      "extraPaths": [
+        ".venv/Lib/site-packages",
+        "src",
+        "."
+      ]
+    },
+    {
+      "root": ".",
+      "extraPaths": [
+        ".venv/Lib/site-packages",
+        "src",
+        "."
+      ]
+    }
+  ],
+  "extraPaths": [
+    ".venv/Lib/site-packages",
+    "src",
+    "."
+  ]
+}

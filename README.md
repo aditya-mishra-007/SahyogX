@@ -2,13 +2,13 @@
 
 > **SIH Problem Statement:** AI-Based Predictive Personnel Stress and Welfare Monitoring System for Uniformed Forces  
 > **Repository Branch:** `backend`  
-> **Phase Completed:** **Phase 4 — Alerts & Analytics**
+> **Phase Completed:** **Phase 5 — Security Compliance, Audit Logging, Data Export & End-to-End Hardening**
 
 ---
 
 ## 1. Overview
 
-**SahyogX Backend** is an asynchronous, high-throughput REST API engineered with **FastAPI**, **SQLAlchemy 2.0 (Async)**, and **PostgreSQL 17**. It acts as the secure intelligence and data core for monitoring personnel welfare, operational workload, deployment rotations, predictive stress evaluation, automated early warning alert triage, and force-wide battalion analytics across uniformed forces.
+**SahyogX Backend** is an asynchronous, high-throughput REST API engineered with **FastAPI**, **SQLAlchemy 2.0 (Async)**, and **PostgreSQL 17**. It acts as the secure intelligence and data core for monitoring personnel welfare, operational workload, deployment rotations, predictive stress evaluation, automated early warning alert triage, force-wide battalion analytics, immutable audit trails, and data-minimized tactical reporting across uniformed forces.
 
 ---
 
@@ -16,17 +16,18 @@
 
 ```text
 src/
-├── main.py                       # FastAPI application entry point, CORS, exception handlers
+├── main.py                       # FastAPI application entry point, CORS, security middleware, exception handlers
 ├── core/
 │   ├── config.py                 # Pydantic BaseSettings loaded from .env & ML model paths
 │   ├── database.py               # Async engine, sessionmaker & connection health ping
 │   ├── logging.py                # Centralized application logging
-│   └── security.py               # bcrypt password hashing & signed PyJWT tokens
+│   ├── security.py               # bcrypt password hashing & signed PyJWT tokens
+│   └── security_headers.py       # OWASP security response headers middleware (HSTS, CSP, X-Frame-Options)
 ├── api/
-│   ├── deps.py                   # Authentication & RBAC dependency injectors
+│   ├── deps.py                   # Authentication & RBAC dependency injectors (DB lookup + fallback)
 │   ├── routes/
-│   │   ├── auth.py               # /api/v1/auth (Login & User Profile)
-│   │   ├── health.py             # /health & /api/health (Readiness Checks)
+│   │   ├── auth.py               # /api/v1/auth (Login & User Profile with audit logging)
+│   │   ├── health.py             # /health, /api/health & /api/health/ready (Readiness Probes)
 │   │   ├── personnel.py          # /api/v1/personnel (Directory & Service Records)
 │   │   ├── deployments.py        # /api/v1/deployments (Postings & Hardship Tracking)
 │   │   ├── duty.py               # /api/v1/duty (Shift Workload & Night Patrols)
@@ -35,17 +36,21 @@ src/
 │   │   ├── predictions.py        # /api/v1/predictions (ML & Heuristic Stress Evaluation)
 │   │   ├── alerts.py             # /api/v1/alerts (Early Warning Alerts & Triage)
 │   │   ├── analytics.py          # /api/v1/analytics (Unit Heatmaps & Theatre Metrics)
+│   │   ├── audit.py              # /api/v1/audit/logs (Forensic Security Audit Logs)
+│   │   ├── export.py             # /api/v1/export (Tactical Unit & Alert CSV/JSON Exports)
 │   │   └── test_rbac.py          # Verification routes for role testing
 │   └── v1/
-│       └── router.py             # V1 Aggregator Router
+│       └── router.py             # V1 Aggregator Router (39 registered API paths)
 ├── models/                       # SQLAlchemy 2.0 Async ORM Models
 │   ├── base.py                   # Base DeclarativeBase and TimestampMixin
+│   ├── user.py                   # User system authentication accounts table
 │   ├── personnel.py              # Personnel table
 │   ├── deployment.py             # Deployments table
 │   ├── duty.py                   # Duty logs table
 │   ├── leave.py                  # Leave records table
 │   ├── survey.py                 # Wellness surveys table
-│   └── alert.py                  # Early warning alerts table
+│   ├── alert.py                  # Early warning alerts table
+│   └── audit.py                  # Append-only security audit log table
 ├── schemas/                      # Pydantic v2 Request / Response DTOs
 │   ├── auth.py
 │   ├── user.py
@@ -56,9 +61,11 @@ src/
 │   ├── survey.py
 │   ├── prediction.py             # Feature vectors & stress prediction responses
 │   ├── alert.py                  # Alert lifecycle, triage payloads & interventions
-│   └── analytics.py              # Unit heatmaps, theatre metrics & welfare summaries
+│   ├── analytics.py              # Unit heatmaps, theatre metrics & welfare summaries
+│   ├── audit.py                  # Audit log query and event responses
+│   └── export.py                 # Tactical export metadata & record envelopes
 └── services/                     # Business Logic Layer
-    ├── auth_service.py
+    ├── auth_service.py           # Hybrid authentication (PostgreSQL users + seed fallback)
     ├── personnel_service.py
     ├── deployment_service.py
     ├── duty_service.py
@@ -68,13 +75,15 @@ src/
     ├── prediction_service.py     # Unified prediction orchestrator & unit analytics
     ├── alert_service.py          # Automated threshold scanning, deduplication & resolution
     ├── analytics_service.py      # Multi-unit heatmaps, theatre distributions & deep-dives
+    ├── audit_service.py          # Append-only audit logging with credential sanitization
+    ├── export_service.py         # RFC 4180 CSV & JSON tactical exports with PII redaction
     └── predictors/               # Predictive Risk Engines
         ├── base.py               # BaseStressPredictor abstract contract
         ├── heuristic.py          # Deterministic explainable baseline predictor
         └── ml_adapter.py         # External trained model artifact adapter
-alembic/                          # Database migration scripts (Phase 2 & Phase 4 tables)
+alembic/                          # Database migration scripts (Phases 2, 4, and 5)
 scripts/                          # Synthetic defense dataset generator
-tests/                            # Automated test suite (54 unit/integration tests)
+tests/                            # Automated test suite (66 unit, integration, and e2e tests)
 ```
 
 ---
@@ -83,12 +92,14 @@ tests/                            # Automated test suite (54 unit/integration te
 
 | Table Name | Description | Key Attributes | Constraints & Indexes |
 | :--- | :--- | :--- | :--- |
+| `users` | System authentication & role identities | `id`, `username`, `password_hash`, `role`, `full_name`, `is_active`, `last_login_at` | `username` UNIQUE, Indexed; Composite index on (`role`, `is_active`) |
 | `personnel` | Uniformed personnel service records | `id`, `service_number`, `name`, `rank`, `role`, `unit`, `joining_date`, `status` | `service_number` UNIQUE, Indexed; Composite index on (`unit`, `rank`) |
 | `deployments` | Field postings & operational hardship | `id`, `personnel_id`, `location`, `deployment_type`, `start_date`, `end_date`, `operational_intensity`, `status` | FK to `personnel.id` (CASCADE); Indexed on `personnel_id`, `start_date` |
 | `duty_logs` | Daily workload shifts & night sentry | `id`, `personnel_id`, `duty_date`, `duty_type`, `hours_worked`, `night_duty`, `consecutive_duty_days`, `workload_score` | FK to `personnel.id` (CASCADE) |
 | `leave_records` | Leave requests & deficit tracking | `id`, `personnel_id`, `leave_type`, `start_date`, `end_date`, `duration_days`, `status`, `reason` | FK to `personnel.id` (CASCADE) |
 | `wellness_surveys`| Psychological & stress screenings | `id`, `personnel_id`, `survey_date`, `stress_score`, `sleep_quality_score`, `fatigue_score`, `wellbeing_score` | FK to `personnel.id` (CASCADE) |
 | `alerts` | Early Warning System (EWS) triage records | `id`, `personnel_id`, `risk_score`, `risk_category`, `trigger_type`, `title`, `severity`, `status`, `recommended_action`, `resolution_notes`, `resolved_by`, `resolved_at` | FK to `personnel.id` (CASCADE); Indexed on (`status`, `severity`), (`personnel_id`, `status`), `created_at` |
+| `audit_logs` | Append-only security & audit trail | `id`, `user_id`, `user_role`, `action`, `resource_type`, `resource_id`, `ip_address`, `details`, `created_at` | Indexed on `action`, `user_id`, `created_at`, (`action`, `created_at`), (`user_id`, `created_at`) |
 
 ---
 
@@ -118,6 +129,11 @@ tests/                            # Automated test suite (54 unit/integration te
 | `/api/v1/analytics/heatmap` | `GET` | ✅ | ✅ | ❌ | Force-wide multi-unit stress risk heatmap |
 | `/api/v1/analytics/theatres` | `GET` | ✅ | ✅ | ❌ | Deployment risk distribution by operational theatre |
 | `/api/v1/analytics/unit/.../summary`| `GET` | ✅ | ✅ | ❌ | Battalion welfare deep-dive profile and deprivation rates |
+| `/api/v1/audit/logs` | `GET` | ✅ | ❌ | ❌ | **Protected:** Forensic access & system modification audit trail |
+| `/api/v1/export/unit/{unit}/csv` | `GET` | ✅ | ✅ | ❌ | Tactical battalion readiness report with clinical PII redacted |
+| `/api/v1/export/unit/{unit}/json` | `GET` | ✅ | ✅ | ❌ | Structured battalion welfare & risk data with export metadata |
+| `/api/v1/export/alerts/csv` | `GET` | ✅ | ✅ | ❌ | Historical & active EWS alerts report for offline contingency |
+| `/api/health/ready` | `GET` | ✅ | ✅ | ✅ | Deep readiness probe verifying database pool & ML engine state |
 
 ---
 
@@ -131,18 +147,18 @@ Personnel Records (Duty, Deployments, Leaves, Surveys)
                       ↓
     PersonnelStressFeatures (19 ML Dimensions)
                       ↓
-        Unified Prediction Service
-       ┌──────────────┴──────────────┐
-       ▼                             ▼
+         Unified Prediction Service
+        ┌──────────────┴──────────────┐
+        ▼                             ▼
 [Primary] ML Model Adapter     [Fallback] Heuristic Predictor
 (Artifact discovery & load)    (Deterministic bounded formula)
-       └──────────────┬──────────────┘
-                      ↓
-       Validated StressPredictionResponse
-       - Risk Score: [0.000 - 1.000]
-       - Risk Category: LOW / MODERATE / HIGH / CRITICAL
-       - Confidence Score: [0.0 - 1.0]
-       - Primary Risk Factors (Explainable stress contributors)
+        └──────────────┬──────────────┘
+                       ↓
+        Validated StressPredictionResponse
+        - Risk Score: [0.000 - 1.000]
+        - Risk Category: LOW / MODERATE / HIGH / CRITICAL
+        - Confidence Score: [0.0 - 1.0]
+        - Primary Risk Factors (Explainable stress contributors)
 ```
 
 ### ML Model Artifact Status
@@ -190,7 +206,37 @@ The baseline evaluates 4 key operational welfare pillars:
 
 ---
 
-## 7. Local Setup & Execution
+## 7. Phase 5 — Security Hardening, Audit Trail & Data Export
+
+### Security Response Headers (OWASP Hardening)
+Every HTTP response is fortified via `SecurityHeadersMiddleware`:
+- `X-Frame-Options: DENY` (prevents clickjacking via malicious framing)
+- `X-Content-Type-Options: nosniff` (mitigates MIME-sniffing exploits)
+- `Strict-Transport-Security: max-age=31536000; includeSubDomains` (enforces HTTPS transport)
+- `Referrer-Policy: strict-origin-when-cross-origin` (prevents sensitive URL leakage)
+- `Content-Security-Policy` (strictly controls asset origins while allowing interactive Swagger UI documentation)
+
+### Append-Only Security & Operational Audit Trail
+The `audit_logs` table records forensic operational activity:
+- Authentication events (`LOGIN_SUCCESS`, `LOGIN_FAILURE`)
+- Data export actions (`DATA_EXPORT_CSV`, `DATA_EXPORT_JSON`)
+- Alert triage lifecycle events (`ALERT_ACKNOWLEDGE`, `ALERT_RESOLVE`)
+- Automated credential sanitization: dictionary detail payloads automatically redact sensitive keys (`password`, `token`, `secret`, `authorization`, `credential`).
+- Query endpoint `GET /api/v1/audit/logs` restricted exclusively to authorized **Commanders**.
+
+### Tactical Data Export & Clinical PII Scrubbing
+Field commanders and medical officers can export unit operational metrics and alert registers:
+- **Unit CSV Export** (`/api/v1/export/unit/{unit}/csv`): Returns an RFC 4180 CSV file attachment.
+- **Unit JSON Export** (`/api/v1/export/unit/{unit}/json`): Structured data payload with export compliance metadata (`exported_by`, `data_classification`, `pii_redacted: True`).
+- **Privacy Enforcement**: Free-text clinical screening remarks and psychiatrist consultation notes are completely omitted from unit exports to protect soldier confidentiality.
+- **Alerts CSV Export** (`/api/v1/export/alerts/csv`): Filtered alert logs for operational reviews.
+
+### Deep Readiness Probe (`/api/health/ready`)
+Verifies live database connectivity via active query execution (`SELECT 1`) alongside ML engine status, returning HTTP 200 (`"status": "READY"`) when operational, or HTTP 503 (`"status": "NOT_READY"`) if the database pool is unreachable.
+
+---
+
+## 8. Local Setup & Execution
 
 ### Step 1: Install Dependencies
 Ensure your virtual environment is active:
@@ -225,14 +271,15 @@ python -m uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
 * **Interactive Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs)
 * **ReDoc Documentation:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
 * **API Health Check:** [http://localhost:8000/health](http://localhost:8000/health)
+* **Deep Readiness Probe:** [http://localhost:8000/api/health/ready](http://localhost:8000/api/health/ready)
 
 ---
 
-## 8. Running Automated Tests
+## 9. Running Automated Tests
 
-Run the complete test suite (54 tests across Phases 1, 2, 3, and 4):
+Run the complete automated test suite (66 tests across all 5 phases):
 ```powershell
 pytest -v
 ```
 
-All 54 tests validate database constraints, CRUD operations, date logic, input validations, RBAC confidentiality boundaries, feature aggregation robustness, heuristic risk bounds, ML adapter fallback behaviors, Early Warning alert deduplication, lifecycle transitions, resolution audit trails, and multi-unit analytics heatmaps.
+All **66 tests** validate database constraints, CRUD operations, date logic, input validations, strict RBAC confidentiality boundaries, feature aggregation robustness, heuristic risk bounds, ML adapter fallback behaviors, Early Warning alert deduplication, lifecycle triage transitions, security response headers, deep readiness probes, login audit trails, credential sanitization, tactical CSV/JSON exports with PII minimization, and end-to-end mission workflows.

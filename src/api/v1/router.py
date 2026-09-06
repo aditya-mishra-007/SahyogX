@@ -10,6 +10,8 @@ from src.api.routes.surveys import router as surveys_router
 from src.api.routes.predictions import router as predictions_router
 from src.api.routes.alerts import router as alerts_router
 from src.api.routes.analytics import router as analytics_router
+from src.api.routes.audit import router as audit_router
+from src.api.routes.export import router as export_router
 
 api_router = APIRouter()
 
@@ -25,3 +27,5 @@ api_router.include_router(surveys_router)
 api_router.include_router(predictions_router)
 api_router.include_router(alerts_router)
 api_router.include_router(analytics_router)
+api_router.include_router(audit_router)
+api_router.include_router(export_router)

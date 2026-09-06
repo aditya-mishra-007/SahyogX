@@ -8,11 +8,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from src.api.routes.health import get_health_status
+from src.api.routes.health import get_health_status, get_readiness_status
 from src.api.v1.router import api_router
 from src.core.config import settings
 from src.core.database import check_db_connection, engine
 from src.core.logging import setup_logging
+from src.core.security_headers import SecurityHeadersMiddleware
 
 # Initialize centralized logging
 setup_logging()
@@ -68,6 +69,9 @@ if settings.CORS_ORIGINS:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+# Security Response Headers Middleware (OWASP recommended hardening)
+app.add_middleware(SecurityHeadersMiddleware)
 
 
 # --------------------------------------------------------------------------
@@ -142,6 +146,24 @@ async def root_health():
 async def api_health():
     """Detailed health check verifying database connectivity."""
     return await get_health_status()
+
+
+@app.get(
+    "/api/health/ready",
+    tags=["Health"],
+    summary="Detailed System Readiness Check",
+)
+@app.get(
+    "/health/ready",
+    tags=["Health"],
+    summary="System Readiness Probe",
+)
+async def api_health_ready():
+    """Deep readiness probe verifying database connectivity and ML prediction engine readiness."""
+    is_ready, data = await get_readiness_status()
+    if not is_ready:
+        return JSONResponse(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, content=data)
+    return JSONResponse(status_code=status.HTTP_200_OK, content=data)
 
 
 # Include versioned API router under /api/v1

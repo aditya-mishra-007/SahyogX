@@ -1,10 +1,18 @@
 import asyncio
 from logging.config import fileConfig
 
+# pyrefly: ignore
+# type: ignore
 from sqlalchemy import pool
+# pyrefly: ignore
+# type: ignore
 from sqlalchemy.engine import Connection
+# pyrefly: ignore
+# type: ignore
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+# pyrefly: ignore
+# type: ignore
 from alembic import context
 
 # Import project settings and base metadata

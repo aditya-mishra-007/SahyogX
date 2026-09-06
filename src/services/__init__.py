@@ -1,8 +1,10 @@
 """Business logic and service layer package for SahyogX."""
 from src.services.auth_service import (
     authenticate_user,
+    authenticate_user_async,
     get_user_by_username,
     get_user_by_id,
+    get_user_from_db_or_dev,
 )
 from src.services.personnel_service import (
     create_personnel,
@@ -42,11 +44,19 @@ from src.services.survey_service import (
 from src.services.feature_aggregator import aggregate_personnel_features
 from src.services.prediction_service import PredictionService, prediction_service
 from src.services import alert_service, analytics_service
+from src.services.audit_service import log_audit_event, list_audit_logs
+from src.services.export_service import (
+    generate_unit_csv_export,
+    generate_unit_json_export,
+    generate_alerts_csv_export,
+)
 
 __all__ = [
     "authenticate_user",
+    "authenticate_user_async",
     "get_user_by_username",
     "get_user_by_id",
+    "get_user_from_db_or_dev",
     "create_personnel",
     "get_personnel_by_id",
     "get_personnel_by_service_number",
@@ -76,4 +86,9 @@ __all__ = [
     "prediction_service",
     "alert_service",
     "analytics_service",
+    "log_audit_event",
+    "list_audit_logs",
+    "generate_unit_csv_export",
+    "generate_unit_json_export",
+    "generate_alerts_csv_export",
 ]

@@ -6,6 +6,8 @@ from src.models.duty import DutyLog
 from src.models.leave import LeaveRecord
 from src.models.survey import WellnessSurvey
 from src.models.alert import Alert
+from src.models.user import User
+from src.models.audit import AuditLog
 
 __all__ = [
     "Base",
@@ -16,4 +18,6 @@ __all__ = [
     "LeaveRecord",
     "WellnessSurvey",
     "Alert",
+    "User",
+    "AuditLog",
 ]

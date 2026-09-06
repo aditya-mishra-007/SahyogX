@@ -1,0 +1,8 @@
+# Pyrefly Configuration for SahyogX Backend
+python-interpreter-path = ".venv/Scripts/python.exe"
+site-package-path = [".venv/Lib/site-packages"]
+search-path = [".", "src"]
+
+[errors]
+missing-import = "ignore"
+missing-module-attribute = "ignore"

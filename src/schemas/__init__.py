@@ -64,6 +64,17 @@ from src.schemas.analytics import (
     TheatreRiskResponse,
     UnitWelfareSummary,
 )
+from src.schemas.audit import (
+    AuditActionType,
+    AuditLogResponse,
+    AuditLogListResponse,
+)
+from src.schemas.export import (
+    ExportFormat,
+    ExportMetadata,
+    UnitExportItem,
+    UnitExportPayload,
+)
 
 __all__ = [
     "UserRole",
@@ -118,4 +129,11 @@ __all__ = [
     "TheatreRiskMetric",
     "TheatreRiskResponse",
     "UnitWelfareSummary",
+    "AuditActionType",
+    "AuditLogResponse",
+    "AuditLogListResponse",
+    "ExportFormat",
+    "ExportMetadata",
+    "UnitExportItem",
+    "UnitExportPayload",
 ]

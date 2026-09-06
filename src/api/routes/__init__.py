@@ -10,6 +10,8 @@ from src.api.routes.surveys import router as surveys_router
 from src.api.routes.predictions import router as predictions_router
 from src.api.routes.alerts import router as alerts_router
 from src.api.routes.analytics import router as analytics_router
+from src.api.routes.audit import router as audit_router
+from src.api.routes.export import router as export_router
 
 __all__ = [
     "health_router",
@@ -23,4 +25,6 @@ __all__ = [
     "predictions_router",
     "alerts_router",
     "analytics_router",
+    "audit_router",
+    "export_router",
 ]

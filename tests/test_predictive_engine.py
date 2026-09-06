@@ -165,6 +165,7 @@ def test_ml_adapter_unavailable_behavior():
 
     available, path, err = adapter.get_status_detail()
     assert available is False
+    assert err is not None
     assert "not found" in err.lower() or "failed" in err.lower()
 
 
