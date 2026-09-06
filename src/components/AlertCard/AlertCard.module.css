@@ -1,0 +1,121 @@
+.alertCard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  gap: var(--space-4);
+  transition: box-shadow var(--transition-fast);
+  box-shadow: var(--shadow-card);
+}
+
+.alertCard:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.severityStrip {
+  width: 4px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+.alertContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.alertTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.alertTitle {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  line-height: 1.4;
+}
+
+.alertMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.alertMetaItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.alertDesc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--space-3);
+}
+
+.alertActions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.btnAction {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+}
+
+.btnAction:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.btnPrimary {
+  background: var(--color-accent);
+  color: #fff;
+  border-color: var(--color-accent);
+}
+
+.btnPrimary:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.statusBadge {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.statusActive {
+  background: var(--color-risk-elevated-bg);
+  color: var(--color-risk-elevated);
+}
+
+.statusAcknowledged {
+  background: var(--color-risk-moderate-bg);
+  color: var(--color-risk-moderate);
+}
+
+.statusReviewed {
+  background: var(--color-risk-low-bg);
+  color: var(--color-risk-low);
+}
