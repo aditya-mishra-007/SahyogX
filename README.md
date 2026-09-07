@@ -60,6 +60,68 @@ graph TD
 
 ---
 
+## 📂 Project Directory & File Structure
+
+```text
+SahyogX/
+├── index.html                   # SPA HTML5 entry point
+├── package.json                 # Frontend dependencies (React 19, Recharts, Lucide)
+├── vite.config.ts               # Vite configuration & build plugins
+├── vercel.json                  # Vercel deployment & SPA routing rewrites
+├── requirements.txt             # Python backend dependencies (FastAPI, SQLAlchemy, asyncpg)
+├── alembic.ini                  # Alembic database migrations configuration
+├── alembic/                     # Database schema revisions (Phases 2, 4, 5)
+├── src/                         # Unified Application Source Code
+│   ├── main.tsx                 # React application DOM entry point
+│   ├── App.tsx                  # Root application router & layout orchestrator
+│   ├── main.py                  # FastAPI backend entry point, lifespan, & CORS setup
+│   ├── api/
+│   │   ├── client.js            # Axios / Fetch client configured with live backend URL
+│   │   ├── deps.py              # FastAPI RBAC & authentication dependencies
+│   │   ├── routes/              # Asynchronous REST API endpoint routers
+│   │   │   ├── auth.py          # /api/v1/auth (Authentication & sessions)
+│   │   │   ├── personnel.py     # /api/v1/personnel (Directory & profiles)
+│   │   │   ├── duty.py          # /api/v1/duty (Shift rosters & workload)
+│   │   │   ├── leaves.py        # /api/v1/leaves (Applications & approvals)
+│   │   │   ├── surveys.py       # /api/v1/surveys (Confidential wellness screenings)
+│   │   │   ├── predictions.py   # /api/v1/predictions (AI stress scores)
+│   │   │   ├── alerts.py        # /api/v1/alerts (Early warning triage)
+│   │   │   ├── analytics.py     # /api/v1/analytics (Battalion heatmaps)
+│   │   │   ├── audit.py         # /api/v1/audit (Forensic security logs)
+│   │   │   └── export.py        # /api/v1/export (Tactical data exports)
+│   │   └── v1/router.py         # Consolidated API v1 router
+│   ├── components/              # React UI Component Library
+│   │   ├── auth/                # Login & multi-role credential switcher
+│   │   ├── layout/              # Header, Sidebar, Mobile Drawer & QuickNav
+│   │   ├── dashboard/           # Strategic Battalion Commander view
+│   │   ├── home/                # Personnel daily wellness overview
+│   │   ├── welfare/             # Unit medical & psychological tracking
+│   │   ├── assessment/          # Interactive clinical wellness survey forms
+│   │   ├── workload/            # Duty & shift workload analysis
+│   │   ├── leave/               # Leave request & recovery timeline
+│   │   ├── notifications/       # Personnel notifications & alerts
+│   │   ├── profile/             # Service record & personnel profile
+│   │   └── resources/           # Peer welfare & counseling resources
+│   ├── context/                 # React Context providers (Auth, Toast, Theme)
+│   ├── core/                    # Backend Core Infrastructure
+│   │   ├── config.py            # Pydantic BaseSettings & environment variables
+│   │   ├── database.py          # Async SQLAlchemy engine & session factory
+│   │   ├── security.py          # PyJWT tokens & bcrypt password hashing
+│   │   └── security_headers.py  # OWASP security response headers middleware
+│   ├── models/                  # SQLAlchemy 2.0 Async ORM Models
+│   ├── schemas/                 # Pydantic v2 Request / Response DTOs
+│   ├── services/                # Business Logic & Predictive Algorithms
+│   │   ├── api.ts               # Frontend API client methods
+│   │   ├── alert_service.py     # Automated risk scanning & alert engine
+│   │   ├── prediction_service.py# AI/ML Stress Predictor & Feature Aggregator
+│   │   └── predictors/          # ML Model adapters & heuristic fallback
+│   └── styles/                  # Glassmorphism design system & token definitions
+├── tests/                       # Automated test suite (Unit, Integration, & E2E)
+└── ml/                          # Machine learning training datasets & pipelines
+```
+
+---
+
 ## 🌟 Key Features & Capabilities
 
 ### 1. 🛡️ Multi-Tier Role-Based Access Control (RBAC)
