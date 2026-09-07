@@ -10,7 +10,7 @@ export interface PersonnelProfile {
   serviceYears: number;
   tradeSpecialty: string;
   emailContact?: string;
-  role: 'personnel';
+  role: 'personnel' | 'commander' | 'medical_officer' | 'officer' | string;
 }
 
 export type WelfareRiskLevel = 'Optimal' | 'Balanced' | 'Moderate Attention' | 'Elevated Review';

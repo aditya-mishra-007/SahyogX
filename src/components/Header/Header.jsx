@@ -8,7 +8,8 @@ export default function Header({ title, breadcrumbs = [] }) {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
-  const initials = user.name
+  const userName = user?.name || 'Officer';
+  const initials = userName
     .split(' ')
     .map((w) => w[0])
     .join('')
@@ -46,8 +47,8 @@ export default function Header({ title, breadcrumbs = [] }) {
         <div className={styles.userInfo}>
           <div className={styles.userAvatar}>{initials}</div>
           <div className={styles.userDetails}>
-            <span className={styles.userName}>{user.name}</span>
-            <span className={styles.userRole}>{ROLE_LABELS[user.role]}</span>
+            <span className={styles.userName}>{userName}</span>
+            <span className={styles.userRole}>{ROLE_LABELS[user?.role] || user?.role || 'Officer'}</span>
           </div>
         </div>
       </div>

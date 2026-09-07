@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { api } from './services/api';
@@ -7,6 +8,7 @@ import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
 import { MobileNav } from './components/layout/MobileNav';
 import { MobileDrawer } from './components/layout/MobileDrawer';
+import { CommandDashboard } from './components/dashboard/CommandDashboard';
 
 // Section Views
 import { HomeView } from './components/home/HomeView';
@@ -20,7 +22,7 @@ import { NotificationsView } from './components/notifications/NotificationsView'
 import { ProfileView } from './components/profile/ProfileView';
 
 const MainAppContent: React.FC = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [currentTab, setCurrentTab] = useState<string>('home');
   const [unreadNotifsCount, setUnreadNotifsCount] = useState<number>(2);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState<boolean>(false);
@@ -39,28 +41,6 @@ const MainAppContent: React.FC = () => {
       refreshUnreadCount();
     }
   }, [isAuthenticated, currentTab]);
-
-  if (isLoading) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'var(--bg-app)',
-        color: 'var(--text-secondary)'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--primary)' }}>SahyogX</div>
-          <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '4px' }}>Loading secure session...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <LoginView />;
-  }
 
   const renderActiveSection = () => {
     switch (currentTab) {
@@ -133,13 +113,47 @@ const MainAppContent: React.FC = () => {
   );
 };
 
+const AppPortalRouter: React.FC = () => {
+  const { isAuthenticated, isLoading, activePortal } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'var(--bg-app)',
+        color: 'var(--text-secondary)'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--primary)' }}>SahyogX</div>
+          <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '4px' }}>Loading secure session...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginView />;
+  }
+
+  if (activePortal === 'command') {
+    return <CommandDashboard />;
+  }
+
+  return <MainAppContent />;
+};
+
 export function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <MainAppContent />
-      </ToastProvider>
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <ToastProvider>
+          <AppPortalRouter />
+        </ToastProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

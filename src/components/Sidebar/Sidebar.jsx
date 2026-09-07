@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
   BarChart3,
@@ -8,6 +8,7 @@ import {
   Building2,
   Menu,
   X,
+  UserCheck,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { ROLES, ROLE_LABELS } from '../../utils/constants';
@@ -31,8 +32,7 @@ const sharedNav = [
 ];
 
 export default function Sidebar({ isOpen, onClose, activeAlerts = 0 }) {
-  const { role, switchRole } = useAuth();
-  const location = useLocation();
+  const { role, switchRole, setActivePortal } = useAuth();
 
   const navItems = role === ROLES.COMMANDER ? commanderNav : officerNav;
 
@@ -123,6 +123,19 @@ export default function Sidebar({ isOpen, onClose, activeAlerts = 0 }) {
                 )}
               </NavLink>
             ))}
+
+            <button
+              className={styles.navItem}
+              onClick={() => {
+                if (typeof onClose === 'function') onClose();
+                if (typeof setActivePortal === 'function') setActivePortal('personnel');
+              }}
+              style={{ width: '100%', textAlign: 'left', background: 'rgba(59, 130, 246, 0.12)', color: '#60a5fa', marginTop: '10px', borderRadius: '6px' }}
+              title="Switch to Individual Personnel Portal"
+            >
+              <UserCheck className={styles.navIcon} size={20} />
+              <span>Personnel Portal</span>
+            </button>
           </div>
         </nav>
 
