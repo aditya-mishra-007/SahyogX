@@ -17,11 +17,37 @@
 }
 
 .brand {
-  padding: var(--space-6) var(--space-5);
+  padding: var(--space-5) var(--space-5);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
+  justify-content: space-between;
+}
+
+.brandInfo {
+  display: flex;
+  align-items: center;
   gap: var(--space-3);
+  min-width: 0;
+}
+
+.sidebarCloseBtn {
+  display: none;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: var(--radius-md);
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.sidebarCloseBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .brandIcon {
@@ -201,5 +227,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .sidebarCloseBtn {
+    display: flex;
   }
 }

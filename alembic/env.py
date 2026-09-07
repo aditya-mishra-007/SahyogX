@@ -9,7 +9,7 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 # pyrefly: ignore
 # type: ignore
-from sqlalchemy.ext.asyncio import async_engine_from_config
+from sqlalchemy.ext.asyncio import create_async_engine
 
 # pyrefly: ignore
 # type: ignore
@@ -26,8 +26,9 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Overwrite sqlalchemy.url with project async database URI
-config.set_main_option("sqlalchemy.url", settings.ASYNC_DATABASE_URI)
+# NOTE: We do NOT call config.set_main_option("sqlalchemy.url", ...) here
+# because alembic's configparser chokes on '%' characters in passwords.
+# Instead we create the engine directly in run_async_migrations().
 
 # Target metadata for 'autogenerate' support
 target_metadata = Base.metadata
@@ -35,9 +36,8 @@ target_metadata = Base.metadata
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
-    url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url,
+        url=settings.ASYNC_DATABASE_URI,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -55,10 +55,9 @@ def do_run_migrations(connection: Connection) -> None:
 
 
 async def run_async_migrations() -> None:
-    """Run migrations in 'online' mode with an async engine."""
-    connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
+    """Run migrations in 'online' mode with an async engine built directly from settings."""
+    connectable = create_async_engine(
+        settings.ASYNC_DATABASE_URI,
         poolclass=pool.NullPool,
     )
 

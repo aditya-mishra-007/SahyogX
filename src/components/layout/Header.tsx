@@ -29,6 +29,15 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { profile } = useAuth();
 
+  const getDisplayName = () => {
+    if (!profile?.name) return profile?.rank || 'User';
+    const nameParts = profile.name.split(' ');
+    if (profile.rank && nameParts[0]?.toLowerCase() === profile.rank.toLowerCase()) {
+      return `${profile.rank} ${nameParts[1] || ''}`.trim();
+    }
+    return `${profile.rank ? profile.rank + ' ' : ''}${nameParts[0] || 'User'}`.trim();
+  };
+
   return (
     <header className="app-header">
       <div className="header-left">
@@ -39,9 +48,9 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <Menu size={20} />
         </button>
-        <div>
+        <div className="header-title-group">
           <h1 className="page-heading">{TAB_TITLES[currentTab] || 'Welfare Portal'}</h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#64748b' }}>
+          <div className="header-session-badge">
             <ShieldCheck size={14} color="#0d9488" />
             <span>Encrypted Individual Personnel Session</span>
           </div>
@@ -67,12 +76,11 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Profile Pill */}
         <button
-          className="btn btn-secondary btn-sm"
+          className="btn btn-secondary btn-sm header-profile-btn"
           onClick={() => onSelectTab('profile')}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px' }}
         >
           <User size={15} />
-          <span style={{ fontWeight: 600 }}>{profile?.rank} {profile?.name?.split(' ')[1] || 'User'}</span>
+          <span className="header-profile-text">{getDisplayName()}</span>
         </button>
       </div>
     </header>

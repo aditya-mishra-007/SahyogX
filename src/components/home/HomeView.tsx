@@ -80,7 +80,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
               <ShieldCheck size={14} /> Unit: {profile?.unit}
             </div>
             <h2 style={{ color: 'white', fontSize: '1.5rem', fontWeight: 700 }}>
-              Welcome, {profile?.rank} {profile?.name}
+              Welcome, {profile?.name?.startsWith(profile?.rank || '') ? profile?.name : `${profile?.rank ? profile.rank + ' ' : ''}${profile?.name || 'Personnel'}`}
             </h2>
             <p style={{ color: '#e2e8f0', fontSize: '0.9rem', marginTop: '6px', maxWidth: '650px' }}>
               Your personal welfare record is active and up-to-date. Regular check-ins help maintain unit readiness and individual well-being.

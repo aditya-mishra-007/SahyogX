@@ -48,13 +48,15 @@ export default function Sidebar({ isOpen, onClose, activeAlerts = 0 }) {
 
   return (
     <>
-      <button
-        className={styles.mobileToggle}
-        onClick={() => (isOpen ? onClose() : onClose('open'))}
-        aria-label="Toggle navigation"
-      >
-        {isOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
+      {!isOpen && (
+        <button
+          className={styles.mobileToggle}
+          onClick={() => onClose('open')}
+          aria-label="Open navigation"
+        >
+          <Menu size={20} />
+        </button>
+      )}
 
       <div
         className={`${styles.sidebarOverlay} ${isOpen ? styles.overlayVisible : ''}`}
@@ -64,11 +66,20 @@ export default function Sidebar({ isOpen, onClose, activeAlerts = 0 }) {
       <aside className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ''}`}>
         {/* Brand */}
         <div className={styles.brand}>
-          <div className={styles.brandIcon}>S</div>
-          <div className={styles.brandText}>
-            <h1>SahyogX</h1>
-            <span>Welfare Monitoring</span>
+          <div className={styles.brandInfo}>
+            <div className={styles.brandIcon}>S</div>
+            <div className={styles.brandText}>
+              <h1>SahyogX</h1>
+              <span>Welfare Monitoring</span>
+            </div>
           </div>
+          <button
+            className={styles.sidebarCloseBtn}
+            onClick={onClose}
+            aria-label="Close navigation"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         {/* Role Display (read-only — NOT switchable) */}
