@@ -1,0 +1,163 @@
+/* ============================================
+   Mock Alerts Data
+   ============================================
+   This file contains mock data for development.
+   Remove or disable when backend APIs are ready.
+   ============================================ */
+
+import { ALERT_SEVERITY, ALERT_STATUS, UNITS } from '../utils/constants';
+
+const baseDate = new Date('2026-09-01');
+
+function hoursAgo(hours) {
+  const d = new Date(baseDate);
+  d.setHours(d.getHours() - hours);
+  return d.toISOString();
+}
+
+export const alertsData = [
+  {
+    id: 'ALR-001',
+    severity: ALERT_SEVERITY.CRITICAL,
+    title: 'Elevated welfare-risk indicator detected',
+    description: 'Personnel PER-003 has crossed the elevated welfare-risk threshold. Immediate welfare review recommended.',
+    personnel_id: 'PER-003',
+    personnel_name: 'Naik Pradeep Yadav',
+    unit: UNITS[0],
+    risk_score: 78.4,
+    timestamp: hoursAgo(2),
+    status: ALERT_STATUS.ACTIVE,
+  },
+  {
+    id: 'ALR-002',
+    severity: ALERT_SEVERITY.CRITICAL,
+    title: 'Elevated welfare-risk indicator detected',
+    description: 'Personnel PER-005 has shown a sustained elevated welfare-risk pattern. Welfare review required.',
+    personnel_id: 'PER-005',
+    personnel_name: 'Havildar Suresh Patil',
+    unit: UNITS[3],
+    risk_score: 82.7,
+    timestamp: hoursAgo(5),
+    status: ALERT_STATUS.ACTIVE,
+  },
+  {
+    id: 'ALR-003',
+    severity: ALERT_SEVERITY.WARNING,
+    title: 'Moderate welfare-risk indicator rising',
+    description: 'Personnel PER-002 welfare-risk score has been trending upward over the past 30 days.',
+    personnel_id: 'PER-002',
+    personnel_name: 'Havildar Amit Singh',
+    unit: UNITS[1],
+    risk_score: 55.8,
+    timestamp: hoursAgo(8),
+    status: ALERT_STATUS.ACKNOWLEDGED,
+  },
+  {
+    id: 'ALR-004',
+    severity: ALERT_SEVERITY.CRITICAL,
+    title: 'Elevated welfare-risk indicator detected',
+    description: 'Personnel PER-010 has crossed the elevated welfare-risk threshold. Immediate welfare review recommended.',
+    personnel_id: 'PER-010',
+    personnel_name: 'Havildar Sanjay Gupta',
+    unit: UNITS[3],
+    risk_score: 74.9,
+    timestamp: hoursAgo(3),
+    status: ALERT_STATUS.ACTIVE,
+  },
+  {
+    id: 'ALR-005',
+    severity: ALERT_SEVERITY.WARNING,
+    title: 'Extended deployment duration noted',
+    description: 'Personnel PER-008 has been on extended deployment for over 100 days without rotation.',
+    personnel_id: 'PER-008',
+    personnel_name: 'Subedar Major Ramesh Nair',
+    unit: UNITS[5],
+    risk_score: 52.1,
+    timestamp: hoursAgo(12),
+    status: ALERT_STATUS.ACKNOWLEDGED,
+  },
+  {
+    id: 'ALR-006',
+    severity: ALERT_SEVERITY.INFO,
+    title: 'Welfare review completed',
+    description: 'Personnel PER-001 welfare review has been completed. Current status: low welfare risk.',
+    personnel_id: 'PER-001',
+    personnel_name: 'Subedar Rajesh Kumar',
+    unit: UNITS[0],
+    risk_score: 18.2,
+    timestamp: hoursAgo(24),
+    status: ALERT_STATUS.REVIEWED,
+  },
+  {
+    id: 'ALR-007',
+    severity: ALERT_SEVERITY.CRITICAL,
+    title: 'Elevated welfare-risk indicator detected',
+    description: 'Personnel PER-015 requires immediate welfare review based on combined risk indicators.',
+    personnel_id: 'PER-015',
+    personnel_name: 'Sepoy Dinesh Rawat',
+    unit: UNITS[1],
+    risk_score: 71.3,
+    timestamp: hoursAgo(6),
+    status: ALERT_STATUS.ACTIVE,
+  },
+  {
+    id: 'ALR-008',
+    severity: ALERT_SEVERITY.WARNING,
+    title: 'Low leave utilization pattern',
+    description: 'Personnel PER-014 has taken minimal leave in the past 6 months. Welfare check recommended.',
+    personnel_id: 'PER-014',
+    personnel_name: 'Naik Anil Verma',
+    unit: UNITS[2],
+    risk_score: 51.2,
+    timestamp: hoursAgo(18),
+    status: ALERT_STATUS.ACTIVE,
+  },
+  {
+    id: 'ALR-009',
+    severity: ALERT_SEVERITY.CRITICAL,
+    title: 'Elevated welfare-risk indicator detected',
+    description: 'Personnel PER-019 welfare-risk indicators have escalated. Requires urgent welfare review.',
+    personnel_id: 'PER-019',
+    personnel_name: 'Havildar Mohan Lal',
+    unit: UNITS[0],
+    risk_score: 76.1,
+    timestamp: hoursAgo(1),
+    status: ALERT_STATUS.ACTIVE,
+  },
+  {
+    id: 'ALR-010',
+    severity: ALERT_SEVERITY.INFO,
+    title: 'Unit welfare assessment completed',
+    description: 'Bravo Company periodic welfare assessment has been completed successfully.',
+    personnel_id: null,
+    personnel_name: null,
+    unit: UNITS[1],
+    risk_score: null,
+    timestamp: hoursAgo(48),
+    status: ALERT_STATUS.REVIEWED,
+  },
+  {
+    id: 'ALR-011',
+    severity: ALERT_SEVERITY.WARNING,
+    title: 'Workload indicator above threshold',
+    description: 'Personnel PER-012 workload score has exceeded the recommended threshold.',
+    personnel_id: 'PER-012',
+    personnel_name: 'Sepoy Karan Malhotra',
+    unit: UNITS[0],
+    risk_score: 45.6,
+    timestamp: hoursAgo(15),
+    status: ALERT_STATUS.ACKNOWLEDGED,
+  },
+  {
+    id: 'ALR-012',
+    severity: ALERT_SEVERITY.INFO,
+    title: 'Welfare review scheduled',
+    description: 'Quarterly welfare review for Delta Company has been scheduled.',
+    personnel_id: null,
+    personnel_name: null,
+    unit: UNITS[3],
+    risk_score: null,
+    timestamp: hoursAgo(72),
+    status: ALERT_STATUS.REVIEWED,
+  },
+];
