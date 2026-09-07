@@ -1,0 +1,6 @@
+python-interpreter-path = "C:/Users/Lenovo/AppData/Local/Programs/Python/Python312/python.exe"
+
+project-includes = [
+    "**/*.py*",
+    "**/*.ipynb",
+]

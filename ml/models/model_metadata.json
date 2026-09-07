@@ -1,0 +1,151 @@
+{
+  "model_name": "LogisticRegression",
+  "model_version": "1.0.0",
+  "trained_at": "2026-09-07T10:16:45.207337",
+  "random_state": 42,
+  "target_classes": [
+    "LOW",
+    "MODERATE",
+    "ELEVATED"
+  ],
+  "input_features": [
+    "duty_hours_weekly",
+    "overtime_hours_weekly",
+    "deployment_duration_months",
+    "deployments_last_3_years",
+    "days_since_last_leave",
+    "leave_days_taken_annual",
+    "recovery_rest_days_monthly",
+    "avg_sleep_hours",
+    "sleep_disruption_index",
+    "physical_readiness_score",
+    "wellness_survey_score",
+    "peer_support_score",
+    "environmental_hardship_score",
+    "unit_type",
+    "role_operational_intensity"
+  ],
+  "selection_justification": "Selected LogisticRegression because it achieved the highest sensitivity (Recall: 0.9400) on the critical ELEVATED risk cohort while maintaining strong balanced accuracy (0.9327) and F1-score (0.9039). This minimizes dangerous False Negatives.",
+  "test_performance": {
+    "accuracy": 0.9387,
+    "balanced_accuracy": 0.9327,
+    "precision_macro": 0.88,
+    "precision_weighted": 0.9432,
+    "recall_macro": 0.9327,
+    "recall_weighted": 0.9387,
+    "recall_elevated": 0.94,
+    "f1_macro": 0.9039,
+    "f1_weighted": 0.94,
+    "roc_auc_macro": 0.99,
+    "roc_auc_weighted": 0.9911,
+    "pr_auc_macro": 0.9554,
+    "per_class": {
+      "LOW": {
+        "precision": 0.9899,
+        "recall": 0.9494,
+        "f1": 0.9692
+      },
+      "MODERATE": {
+        "precision": 0.8535,
+        "recall": 0.9086,
+        "f1": 0.8802
+      },
+      "ELEVATED": {
+        "precision": 0.7966,
+        "recall": 0.94,
+        "f1": 0.8624
+      }
+    },
+    "confusion_matrix": {
+      "labels": [
+        "LOW",
+        "MODERATE",
+        "ELEVATED"
+      ],
+      "matrix": [
+        [
+          488,
+          26,
+          0
+        ],
+        [
+          5,
+          169,
+          12
+        ],
+        [
+          0,
+          3,
+          47
+        ]
+      ]
+    },
+    "classification_report": {
+      "LOW": {
+        "precision": 0.9898580121703854,
+        "recall": 0.9494163424124513,
+        "f1-score": 0.9692154915590864,
+        "support": 514.0
+      },
+      "MODERATE": {
+        "precision": 0.8535353535353535,
+        "recall": 0.9086021505376344,
+        "f1-score": 0.8802083333333334,
+        "support": 186.0
+      },
+      "ELEVATED": {
+        "precision": 0.7966101694915254,
+        "recall": 0.94,
+        "f1-score": 0.8623853211009175,
+        "support": 50.0
+      },
+      "accuracy": 0.9386666666666666,
+      "macro avg": {
+        "precision": 0.8800011783990881,
+        "recall": 0.9326728309833618,
+        "f1-score": 0.903936381997779,
+        "support": 750.0
+      },
+      "weighted avg": {
+        "precision": 0.9431668033169733,
+        "recall": 0.9386666666666666,
+        "f1-score": 0.9400197049552217,
+        "support": 750.0
+      }
+    }
+  },
+  "comparison_summary": {
+    "LogisticRegression": {
+      "fit_time_sec": 0.129,
+      "val_balanced_acc": 0.9035,
+      "val_elevated_recall": 0.9184,
+      "val_f1_macro": 0.8682,
+      "test_balanced_acc": 0.9327,
+      "test_elevated_recall": 0.94,
+      "test_f1_macro": 0.9039
+    },
+    "RandomForest": {
+      "fit_time_sec": 0.544,
+      "val_balanced_acc": 0.8857,
+      "val_elevated_recall": 0.8163,
+      "val_f1_macro": 0.8786,
+      "test_balanced_acc": 0.9263,
+      "test_elevated_recall": 0.92,
+      "test_f1_macro": 0.9015
+    },
+    "HistGradientBoosting": {
+      "fit_time_sec": 3.27,
+      "val_balanced_acc": 0.8968,
+      "val_elevated_recall": 0.8571,
+      "val_f1_macro": 0.8922,
+      "test_balanced_acc": 0.933,
+      "test_elevated_recall": 0.92,
+      "test_f1_macro": 0.9247
+    }
+  },
+  "artifacts": {
+    "preprocessor": "preprocessor.joblib",
+    "classifier": "best_model.joblib",
+    "integrated_pipeline": "welfare_risk_pipeline.joblib"
+  }
+}
