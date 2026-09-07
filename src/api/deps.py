@@ -79,3 +79,7 @@ def require_role(*allowed_roles: UserRole) -> Callable:
 require_commander = require_role(UserRole.COMMANDER)
 require_medical_officer = require_role(UserRole.MEDICAL_OFFICER)
 require_personnel = require_role(UserRole.PERSONNEL)
+
+# Composite: accessible to both COMMANDER and MEDICAL_OFFICER, NOT to PERSONNEL
+# Use this for analytics, alerts, personnel list, and other command-level data.
+require_officer_or_commander = require_role(UserRole.COMMANDER, UserRole.MEDICAL_OFFICER)

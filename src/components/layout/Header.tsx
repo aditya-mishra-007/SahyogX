@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Bell, ShieldCheck, User, Menu, LayoutDashboard } from 'lucide-react';
+import { Bell, ShieldCheck, User, Menu } from 'lucide-react';
 
 interface HeaderProps {
   currentTab: string;
@@ -27,7 +27,7 @@ export const Header: React.FC<HeaderProps> = ({
   unreadNotificationsCount,
   onToggleMobileMenu
 }) => {
-  const { profile, setActivePortal } = useAuth();
+  const { profile } = useAuth();
 
   return (
     <header className="app-header">
@@ -49,16 +49,10 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="header-right">
-        {/* Command Dashboard Portal Switcher */}
-        <button
-          className="btn btn-primary btn-sm"
-          onClick={() => setActivePortal('command')}
-          style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '0.8rem' }}
-          title="Switch to Commander & Officer Dashboard"
-        >
-          <LayoutDashboard size={15} />
-          <span>Command Dashboard</span>
-        </button>
+        {/* NOTE: The Command Dashboard Portal Switcher button has been intentionally removed.
+            Portal access is determined strictly by the backend-authorised role at login.
+            PERSONNEL role cannot switch to the command portal under any circumstances.
+        */}
 
         {/* Notification Bell */}
         <button

@@ -4,35 +4,54 @@ import AlertCard from '../../components/AlertCard/AlertCard';
 import SearchFilter from '../../components/SearchFilter/SearchFilter';
 import { fetchAlerts, updateAlertStatus } from '../../api/alertsApi';
 import { ALERT_SEVERITY, ALERT_STATUS, UNITS } from '../../utils/constants';
+import { alertsData } from '../../mocks';
 import { filterBySearch } from '../../utils/helpers';
 import styles from '../Pages.module.css';
 
 export default function OfficerAlerts() {
-  const [alerts, setAlerts] = useState([]);
+  const [alerts, setAlerts] = useState(alertsData);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [severityFilter, setSeverityFilter] = useState('');
   const [unitFilter, setUnitFilter] = useState('');
 
   useEffect(() => {
-    fetchAlerts().then(setAlerts);
+    fetchAlerts()
+      .then(data => { if (data && data.length) setAlerts(data); })
+      .finally(() => setLoading(false));
   }, []);
 
   const handleAcknowledge = async (id) => {
     await updateAlertStatus(id, ALERT_STATUS.ACKNOWLEDGED);
-    const updated = await fetchAlerts();
+    const updated = await fetchAlerts(true);
     setAlerts(updated);
   };
 
   const handleReview = async (id) => {
     await updateAlertStatus(id, ALERT_STATUS.REVIEWED);
-    const updated = await fetchAlerts();
+    const updated = await fetchAlerts(true);
     setAlerts(updated);
   };
 
+  // Extract unique units dynamically from real alerts, with fallback to constant list
+  const availableUnits = Array.from(
+    new Set(alerts.map(a => a.unit).filter(Boolean))
+  ).sort();
+  const unitOptions = availableUnits.length > 0
+    ? availableUnits.map(u => ({ value: u, label: u }))
+    : UNITS.map(u => ({ value: u, label: u }));
+
   let filtered = filterBySearch(alerts, search, ['title', 'description', 'personnel_name', 'unit']);
-  if (statusFilter) filtered = filtered.filter(a => a.status === statusFilter);
-  if (severityFilter) filtered = filtered.filter(a => a.severity === severityFilter);
+  if (statusFilter) {
+    filtered = filtered.filter(a => {
+      if (statusFilter === 'active') return a.status === 'active' || a.status === 'new';
+      if (statusFilter === 'acknowledged') return a.status === 'acknowledged' || a.status === 'in_review';
+      if (statusFilter === 'reviewed') return a.status === 'reviewed' || a.status === 'resolved';
+      return a.status === statusFilter;
+    });
+  }
+  if (severityFilter) filtered = filtered.filter(a => a.severity?.toLowerCase() === severityFilter.toLowerCase());
   if (unitFilter) filtered = filtered.filter(a => a.unit === unitFilter);
 
   const filters = [
@@ -63,12 +82,12 @@ export default function OfficerAlerts() {
       label: 'All Units',
       value: unitFilter,
       onChange: setUnitFilter,
-      options: UNITS.map(u => ({ value: u, label: u })),
+      options: unitOptions,
     },
   ];
 
-  const activeCount = filtered.filter(a => a.status === ALERT_STATUS.ACTIVE).length;
-  const ackCount = filtered.filter(a => a.status === ALERT_STATUS.ACKNOWLEDGED).length;
+  const activeCount = alerts.filter(a => a.status === 'active' || a.status === 'new').length;
+  const ackCount = alerts.filter(a => a.status === 'acknowledged' || a.status === 'in_review').length;
 
   return (
     <>
@@ -84,7 +103,7 @@ export default function OfficerAlerts() {
           <div>
             <h3 className={styles.sectionTitle}>Alert Management</h3>
             <p className={styles.sectionSubtitle}>
-              {activeCount} active · {ackCount} acknowledged · {filtered.length} total
+              {loading ? 'Retrieving early warning alerts...' : `${activeCount} active · ${ackCount} acknowledged · ${filtered.length} visible (${alerts.length} total)`}
             </p>
           </div>
         </div>
@@ -98,7 +117,13 @@ export default function OfficerAlerts() {
         </div>
 
         <div className={styles.alertsList}>
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: 'var(--space-8)', color: 'var(--color-text-tertiary)' }}>
+              <div style={{ fontSize: '1.75rem', marginBottom: '8px' }}>🔔</div>
+              <div style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>Loading Early Warning Alerts...</div>
+              <div style={{ fontSize: '0.85rem', marginTop: '4px' }}>Connecting to unit surveillance stream</div>
+            </div>
+          ) : filtered.length === 0 ? (
             <p style={{ color: 'var(--color-text-tertiary)', fontSize: 'var(--font-size-sm)', textAlign: 'center', padding: 'var(--space-8)' }}>
               No alerts match the current filters.
             </p>

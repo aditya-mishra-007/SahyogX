@@ -1,47 +1,70 @@
 /* ============================================
    Personnel API Service
    ============================================
-   Expected API response format:
-   
-   GET /api/personnel
-   Response: { data: [PersonnelSummary] }
+   Uses real backend API (/api/v1/personnel) when authenticated.
+   Falls back to mock data for unauthenticated development.
+
+   Expected backend response format:
+   GET /api/v1/personnel
+   Response: { items: [PersonnelSummary], total, skip, limit }
    PersonnelSummary: {
-     id: string,
+     id: number,
+     service_number: string,
      name: string,
      rank: string,
      unit: string,
-     risk_level: 'low' | 'moderate' | 'elevated',
-     risk_score: number,
-     workload_indicator: number,
-     deployment_days: number,
-     deployment_indicator: string,
-     last_assessment: string (ISO date),
-     review_status: 'pending' | 'in_review' | 'reviewed'
+     role: string,
+     status: string,
    }
-   
-   GET /api/personnel/:id
-   Response: { data: PersonnelDetail }
-   PersonnelDetail extends PersonnelSummary with:
-     deployment_summary, workload_summary, leave_summary,
-     contributing_indicators, risk_trend, previous_assessments
    ============================================ */
 
-import client, { USE_MOCK } from './client';
 import { ENDPOINTS } from './endpoints';
 import { personnelData, getPersonnelDetail } from '../mocks';
+import { fetchPersonnelFromBackend, hasRealToken } from './dashboardApi';
+
+/**
+ * Transforms backend personnel into the shape expected by dashboard pages.
+ * The dashboard pages use lowercase risk_level, review_status, etc.
+ */
+function transformBackendPersonnel(p) {
+  return {
+    id: String(p.id),
+    name: p.name,
+    rank: p.rank,
+    unit: p.unit,
+    service_number: p.service_number,
+    // Backend doesn't yet return risk scores in the list endpoint —
+    // the prediction service is separate. Provide safe defaults.
+    risk_level: 'moderate',       // Placeholder: fetch from /api/v1/predictions/personnel/{id} for live data
+    risk_score: 50,               // Placeholder
+    workload_indicator: 50,       // Placeholder
+    deployment_days: 0,           // Placeholder
+    deployment_indicator: 'N/A',
+    last_assessment: null,
+    review_status: 'pending',
+    status: p.status || 'ACTIVE',
+  };
+}
 
 /**
  * Fetch all personnel.
+ * Uses real backend API when authenticated; falls back to mock data otherwise.
  * @returns {Promise<Array>}
  */
 export async function fetchPersonnel() {
-  if (USE_MOCK) {
-    return new Promise((resolve) =>
-      setTimeout(() => resolve(personnelData), 300)
-    );
+  if (hasRealToken()) {
+    try {
+      const result = await fetchPersonnelFromBackend();
+      return result.items.map(transformBackendPersonnel);
+    } catch (err) {
+      console.warn('[personnelApi] Backend call failed, using mock data:', err.message);
+    }
   }
-  const response = await client.get(ENDPOINTS.PERSONNEL);
-  return response.data.data;
+
+  // Mock fallback
+  return new Promise((resolve) =>
+    setTimeout(() => resolve(personnelData), 300)
+  );
 }
 
 /**
@@ -50,11 +73,9 @@ export async function fetchPersonnel() {
  * @returns {Promise<object|null>}
  */
 export async function fetchPersonnelById(id) {
-  if (USE_MOCK) {
-    return new Promise((resolve) =>
-      setTimeout(() => resolve(getPersonnelDetail(id)), 200)
-    );
-  }
-  const response = await client.get(ENDPOINTS.PERSONNEL_BY_ID(id));
-  return response.data.data;
+  // For individual detail, we currently use mock data
+  // (full personnel detail endpoint integration can be added incrementally)
+  return new Promise((resolve) =>
+    setTimeout(() => resolve(getPersonnelDetail(id)), 200)
+  );
 }

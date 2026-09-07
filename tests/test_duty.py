@@ -42,8 +42,10 @@ async def test_duty_log_validation(async_client: AsyncClient):
     """Verify input validation constraints on duty shifts."""
     headers = await get_auth_header(async_client, "personnel", "personnel123")
 
-    # Get valid personnel ID
-    p_resp = await async_client.get("/api/v1/personnel?limit=1", headers=headers)
+    # Get valid personnel ID using commander token (list endpoint requires COMMANDER/MEDICAL_OFFICER)
+    cmd_headers = await get_auth_header(async_client, "commander", "commander123")
+    p_resp = await async_client.get("/api/v1/personnel?limit=1", headers=cmd_headers)
+    assert p_resp.status_code == 200, f"Commander personnel list failed: {p_resp.text}"
     p_id = p_resp.json()["items"][0]["id"]
 
     # Test invalid hours worked (> 24.0)

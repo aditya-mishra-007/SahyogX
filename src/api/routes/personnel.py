@@ -2,7 +2,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.deps import get_current_user, require_commander
+from src.api.deps import get_current_user, require_commander, require_officer_or_commander
 from src.core.database import get_db
 from src.schemas.personnel import (
     PersonnelCreate,
@@ -35,12 +35,12 @@ async def get_all_personnel(
     status_filter: Optional[str] = Query(None, alias="status", description="Filter by status"),
     skip: int = Query(0, ge=0, description="Offset index for pagination"),
     limit: int = Query(50, ge=1, le=100, description="Number of records per page"),
-    current_user: UserResponse = Depends(get_current_user),
+    current_user: UserResponse = Depends(require_officer_or_commander),
     db: AsyncSession = Depends(get_db),
 ) -> PersonnelListResponse:
     """
     Returns paginated list of personnel.
-    Accessible to all authenticated roles (`COMMANDER`, `MEDICAL_OFFICER`, `PERSONNEL`).
+    **Restricted to `COMMANDER` and `MEDICAL_OFFICER`** — PERSONNEL role cannot enumerate other soldiers.
     """
     items, total = await list_personnel(
         db, unit=unit, rank=rank, status=status_filter, skip=skip, limit=limit

@@ -40,13 +40,20 @@ async def test_filter_personnel_by_unit(async_client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_get_personnel_by_id(async_client: AsyncClient):
-    """Verify retrieval of specific personnel profile."""
-    headers = await get_auth_header(async_client, "personnel", "personnel123")
-    # Fetch first record to get valid ID
-    list_resp = await async_client.get("/api/v1/personnel?limit=1", headers=headers)
+    """Verify retrieval of specific personnel profile.
+    
+    List endpoint requires COMMANDER or MEDICAL_OFFICER (RBAC).
+    Individual GET by ID is accessible to all authenticated roles.
+    """
+    # Use commander token to list (list endpoint now restricted to COMMANDER/MEDICAL_OFFICER)
+    cmd_headers = await get_auth_header(async_client, "commander", "commander123")
+    list_resp = await async_client.get("/api/v1/personnel?limit=1", headers=cmd_headers)
+    assert list_resp.status_code == 200, f"Commander list failed: {list_resp.text}"
     p_id = list_resp.json()["items"][0]["id"]
 
-    get_resp = await async_client.get(f"/api/v1/personnel/{p_id}", headers=headers)
+    # Individual GET by ID is accessible to any authenticated user
+    prs_headers = await get_auth_header(async_client, "personnel", "personnel123")
+    get_resp = await async_client.get(f"/api/v1/personnel/{p_id}", headers=prs_headers)
     assert get_resp.status_code == 200
     assert get_resp.json()["id"] == p_id
 

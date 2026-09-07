@@ -1,23 +1,38 @@
-import { Clock, User, MapPin, AlertTriangle } from 'lucide-react';
+import { useState } from 'react';
+import { Clock, User, MapPin, AlertTriangle, CheckCircle, ShieldCheck } from 'lucide-react';
 import { ALERT_STATUS } from '../../utils/constants';
 import { formatRelativeTime, formatRiskScore } from '../../utils/formatters';
 import { getSeverityColor } from '../../utils/helpers';
 import styles from './AlertCard.module.css';
 
 export default function AlertCard({ alert, onAcknowledge, onReview }) {
+  const [loadingAction, setLoadingAction] = useState(null);
   const severityColor = getSeverityColor(alert.severity);
 
-  const statusClass = {
-    [ALERT_STATUS.ACTIVE]: styles.statusActive,
-    [ALERT_STATUS.ACKNOWLEDGED]: styles.statusAcknowledged,
-    [ALERT_STATUS.REVIEWED]: styles.statusReviewed,
-  }[alert.status] || '';
+  const isReviewed = alert.status === ALERT_STATUS.REVIEWED || alert.status === 'reviewed' || alert.status === 'resolved';
+  const isAcknowledged = alert.status === ALERT_STATUS.ACKNOWLEDGED || alert.status === 'acknowledged' || alert.status === 'in_review';
+  const isActive = (!isReviewed && !isAcknowledged) || alert.status === ALERT_STATUS.ACTIVE || alert.status === 'active' || alert.status === 'new';
 
-  const statusLabel = {
-    [ALERT_STATUS.ACTIVE]: 'Active',
-    [ALERT_STATUS.ACKNOWLEDGED]: 'Acknowledged',
-    [ALERT_STATUS.REVIEWED]: 'Reviewed',
-  }[alert.status] || alert.status;
+  let statusClass = styles.statusActive;
+  let statusLabel = 'Active';
+
+  if (isReviewed) {
+    statusClass = styles.statusReviewed;
+    statusLabel = 'Resolved';
+  } else if (isAcknowledged) {
+    statusClass = styles.statusAcknowledged;
+    statusLabel = 'Acknowledged';
+  }
+
+  const handleActionClick = async (actionType, fn) => {
+    if (!fn || loadingAction) return;
+    setLoadingAction(actionType);
+    try {
+      await fn(alert.id);
+    } finally {
+      setLoadingAction(null);
+    }
+  };
 
   return (
     <div className={styles.alertCard}>
@@ -53,21 +68,60 @@ export default function AlertCard({ alert, onAcknowledge, onReview }) {
 
         <p className={styles.alertDesc}>{alert.description}</p>
 
+        {alert.recommended_action && (
+          <p style={{
+            fontSize: 'var(--font-size-xs)',
+            color: 'var(--color-accent)',
+            marginBottom: 'var(--space-3)',
+            background: 'var(--color-accent-bg)',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            display: 'inline-block',
+          }}>
+            <strong>Recommended Action:</strong> {alert.recommended_action}
+          </p>
+        )}
+
         <div className={styles.alertActions}>
-          {alert.status === ALERT_STATUS.ACTIVE && onAcknowledge && (
+          {isActive && onAcknowledge && (
             <button
               className={`${styles.btnAction} ${styles.btnPrimary}`}
-              onClick={() => onAcknowledge(alert.id)}
+              disabled={loadingAction !== null}
+              onClick={() => handleActionClick('ack', onAcknowledge)}
             >
-              Acknowledge
+              {loadingAction === 'ack' ? 'Updating...' : 'Acknowledge'}
             </button>
           )}
-          {(alert.status === ALERT_STATUS.ACTIVE || alert.status === ALERT_STATUS.ACKNOWLEDGED) &&
-            onReview && (
-              <button className={styles.btnAction} onClick={() => onReview(alert.id)}>
-                Mark as Reviewed
-              </button>
-            )}
+
+          {(isActive || isAcknowledged) && onReview && (
+            <button
+              className={`${styles.btnAction} ${isActive ? '' : styles.btnPrimary}`}
+              disabled={loadingAction !== null}
+              onClick={() => handleActionClick('review', onReview)}
+              style={isActive ? { border: '1px solid var(--color-risk-low)', color: 'var(--color-risk-low)' } : {}}
+            >
+              {loadingAction === 'review' ? 'Resolving...' : '✓ Resolve Alert'}
+            </button>
+          )}
+
+          {isReviewed && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: 'var(--font-size-xs)',
+              color: 'var(--color-risk-low)',
+              fontWeight: 600,
+            }}>
+              <CheckCircle size={14} />
+              <span>Resolved & Mitigated</span>
+              {alert.resolved_by && (
+                <span style={{ color: 'var(--color-text-tertiary)', fontWeight: 400 }}>
+                  ({alert.resolved_by})
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

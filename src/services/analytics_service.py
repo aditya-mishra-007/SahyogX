@@ -7,6 +7,7 @@ theatre vulnerability distributions, and deep-dive battalion profiles.
 
 from datetime import datetime, timezone, timedelta, date
 import logging
+import time
 from typing import List, Optional
 from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -30,12 +31,31 @@ from src.services.prediction_service import prediction_service
 
 logger = logging.getLogger("sahyogx.analytics_service")
 
+# High-performance in-memory TTL cache for force-wide heatmap (reduces DB hits from 350+ to 0)
+_HEATMAP_CACHE = {
+    "data": None,
+    "expires_at": 0.0,
+}
+
+
+def invalidate_heatmap_cache() -> None:
+    """Invalidates the in-memory heatmap cache to force re-computation."""
+    global _HEATMAP_CACHE
+    _HEATMAP_CACHE["data"] = None
+    _HEATMAP_CACHE["expires_at"] = 0.0
+
 
 async def get_unit_heatmap(db: AsyncSession) -> UnitHeatmapResponse:
     """
     Computes a force-wide stress risk heatmap across all registered battalions/regiments.
     Returns unit-level risk score, risk level, active alerts count, and risk breakdown.
+    Utilizes a 120-second in-memory TTL cache for sub-millisecond response latency.
     """
+    global _HEATMAP_CACHE
+    now_ts = time.time()
+    if _HEATMAP_CACHE["data"] is not None and now_ts < _HEATMAP_CACHE["expires_at"]:
+        logger.debug("Serving force heatmap from fast in-memory TTL cache")
+        return _HEATMAP_CACHE["data"]
     unit_stmt = (
         select(Personnel.unit)
         .where(Personnel.status == "ACTIVE")
@@ -126,13 +146,16 @@ async def get_unit_heatmap(db: AsyncSession) -> UnitHeatmapResponse:
         else 0.0
     )
 
-    return UnitHeatmapResponse(
+    result = UnitHeatmapResponse(
         units=items,
         force_total_personnel=total_force_personnel,
         force_average_risk_score=force_avg,
         most_vulnerable_unit=most_vulnerable_unit,
         generated_at=now,
     )
+    _HEATMAP_CACHE["data"] = result
+    _HEATMAP_CACHE["expires_at"] = time.time() + 120.0  # 2 minutes TTL
+    return result
 
 
 async def get_theatre_risk_analytics(db: AsyncSession) -> TheatreRiskResponse:

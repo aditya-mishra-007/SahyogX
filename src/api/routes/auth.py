@@ -2,17 +2,28 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from pydantic import BaseModel, Field
+from typing import Optional
+
 from src.api.deps import get_current_user
 from src.core.database import get_db
 from src.core.security import create_access_token
 from src.schemas.auth import Token
-from src.schemas.user import UserResponse
+from src.schemas.user import UserResponse, UserRole
 from src.services.audit_service import log_audit_event
-from src.services.auth_service import authenticate_user_async
+from src.services.auth_service import authenticate_user_async, register_user_async
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+
+class RegisterRequest(BaseModel):
+    username: str = Field(..., description="Service number or username")
+    password: str = Field(..., description="Password")
+    role: UserRole = Field(default=UserRole.PERSONNEL, description="User role: PERSONNEL, COMMANDER, or MEDICAL_OFFICER")
+    full_name: Optional[str] = Field(None, description="Display name and military rank")
+
 
 
 @router.post(
@@ -128,3 +139,42 @@ async def get_me(
     Requires a valid JWT Bearer token in the Authorization header.
     """
     return current_user
+
+
+@router.post(
+    "/register",
+    response_model=Token,
+    status_code=status.HTTP_201_CREATED,
+    summary="Register New User Account",
+    response_description="Registers user and returns JWT Bearer token",
+)
+async def register(
+    data: RegisterRequest,
+    db: AsyncSession = Depends(get_db),
+) -> Token:
+    """
+    Registers a new soldier or officer account.
+    Once registered, the user can immediately log in anytime.
+    """
+    username = data.username.strip().lower()
+    if not username or not data.password.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username / Service Number and password are required",
+        )
+
+    user = await register_user_async(
+        username=username,
+        password=data.password.strip(),
+        role=data.role,
+        full_name=data.full_name,
+        db=db,
+    )
+
+    access_token = create_access_token(
+        subject=user.username,
+        role=user.role.value,
+    )
+
+    return Token(access_token=access_token, token_type="bearer")
+

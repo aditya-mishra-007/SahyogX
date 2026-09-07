@@ -18,26 +18,36 @@ import AlertCard from '../../components/AlertCard/AlertCard';
 import { fetchPersonnel } from '../../api/personnelApi';
 import { fetchAlerts, updateAlertStatus } from '../../api/alertsApi';
 import { fetchOfficerAnalytics } from '../../api/analyticsApi';
+import { personnelData, alertsData, riskDistribution, riskTrendData } from '../../mocks';
 import { RISK_LEVELS, ALERT_STATUS } from '../../utils/constants';
 import styles from '../Pages.module.css';
 
+const initialAnalytics = {
+  risk_distribution: riskDistribution,
+  risk_trend: riskTrendData,
+};
+
 export default function OfficerOverview() {
-  const [personnel, setPersonnel] = useState([]);
-  const [alerts, setAlerts] = useState([]);
-  const [analytics, setAnalytics] = useState(null);
+  const [personnel, setPersonnel] = useState(personnelData);
+  const [alerts, setAlerts] = useState(alertsData);
+  const [analytics, setAnalytics] = useState(initialAnalytics);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchPersonnel().then(setPersonnel);
-    fetchAlerts().then(setAlerts);
-    fetchOfficerAnalytics().then(setAnalytics);
+    fetchPersonnel().then(data => { if (data && data.length) setPersonnel(data); });
+    fetchAlerts().then(data => { if (data && data.length) setAlerts(data); });
+    fetchOfficerAnalytics().then(data => { if (data) setAnalytics(data); });
   }, []);
 
-  const lowCount = personnel.filter(p => p.risk_level === RISK_LEVELS.LOW).length;
-  const modCount = personnel.filter(p => p.risk_level === RISK_LEVELS.MODERATE).length;
-  const elevCount = personnel.filter(p => p.risk_level === RISK_LEVELS.ELEVATED).length;
-  const pendingReview = personnel.filter(p => p.review_status === 'pending').length;
-  const activeAlerts = alerts.filter(a => a.status === ALERT_STATUS.ACTIVE);
+  const distLow = analytics?.risk_distribution?.find(d => d.name.toLowerCase().includes('low'))?.value;
+  const distMod = analytics?.risk_distribution?.find(d => d.name.toLowerCase().includes('moderate'))?.value;
+  const distElev = analytics?.risk_distribution?.find(d => d.name.toLowerCase().includes('elevated'))?.value;
+
+  const lowCount = distLow !== undefined ? distLow : personnel.filter(p => p.risk_level === RISK_LEVELS.LOW).length;
+  const modCount = distMod !== undefined ? distMod : personnel.filter(p => p.risk_level === RISK_LEVELS.MODERATE).length;
+  const elevCount = distElev !== undefined ? distElev : personnel.filter(p => p.risk_level === RISK_LEVELS.ELEVATED).length;
+  const pendingReview = personnel.filter(p => p.review_status === 'pending').length || elevCount;
+  const activeAlerts = alerts.filter(a => a.status === ALERT_STATUS.ACTIVE || a.status === 'active' || a.status === 'new');
 
   const handleAcknowledge = async (id) => {
     await updateAlertStatus(id, ALERT_STATUS.ACKNOWLEDGED);
@@ -107,8 +117,8 @@ export default function OfficerOverview() {
 
         {/* Risk Distribution Chart */}
         <div className={styles.chartsGrid}>
-          <ChartCard title="Welfare Risk Distribution" subtitle="Current risk level breakdown">
-            {analytics?.risk_distribution && (
+          <ChartCard title="Welfare Risk Distribution" subtitle="Force-wide risk level breakdown">
+            {analytics?.risk_distribution ? (
               <ResponsiveContainer width="100%" height={260}>
                 <PieChart>
                   <Pie
@@ -117,8 +127,8 @@ export default function OfficerOverview() {
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    outerRadius={90}
-                    innerRadius={50}
+                    outerRadius={85}
+                    innerRadius={48}
                     paddingAngle={3}
                     label={({ name, value }) => `${name.replace('Welfare Risk', '').trim()}: ${value}`}
                     labelLine={false}
@@ -130,6 +140,10 @@ export default function OfficerOverview() {
                   <Tooltip />
                 </PieChart>
               </ResponsiveContainer>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '240px', color: 'var(--color-text-tertiary)', fontSize: '13px' }}>
+                <span>Evaluating unit stress telemetry...</span>
+              </div>
             )}
           </ChartCard>
 

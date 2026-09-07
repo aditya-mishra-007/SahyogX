@@ -16,8 +16,10 @@ async def test_list_and_apply_leave(async_client: AsyncClient):
     """Verify leave application submission and duration calculation."""
     prs_headers = await get_auth_header(async_client, "personnel", "personnel123")
 
-    # Get valid personnel ID
-    p_resp = await async_client.get("/api/v1/personnel?limit=1", headers=prs_headers)
+    # Get valid personnel ID using commander token (list endpoint requires COMMANDER/MEDICAL_OFFICER)
+    cmd_headers = await get_auth_header(async_client, "commander", "commander123")
+    p_resp = await async_client.get("/api/v1/personnel?limit=1", headers=cmd_headers)
+    assert p_resp.status_code == 200, f"Commander personnel list failed: {p_resp.text}"
     p_id = p_resp.json()["items"][0]["id"]
 
     # Test auto-calculation of duration (start: 2026-10-01 to end: 2026-10-10 = 10 days inclusive)
@@ -38,7 +40,6 @@ async def test_list_and_apply_leave(async_client: AsyncClient):
     leave_id = leave_data["id"]
 
     # Test Commander / Medical Officer approval
-    cmd_headers = await get_auth_header(async_client, "commander", "commander123")
     approval_resp = await async_client.patch(
         f"/api/v1/leaves/{leave_id}",
         json={"status": "APPROVED"},

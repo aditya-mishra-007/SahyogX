@@ -8,38 +8,53 @@ import AlertCard from '../../components/AlertCard/AlertCard';
 import SearchFilter from '../../components/SearchFilter/SearchFilter';
 import { fetchAlerts, updateAlertStatus } from '../../api/alertsApi';
 import { ALERT_STATUS, ALERT_SEVERITY, UNITS } from '../../utils/constants';
+import { alertsData } from '../../mocks';
 import { filterBySearch } from '../../utils/helpers';
 import styles from '../Pages.module.css';
 
 export default function CommanderAlerts() {
-  const [alerts, setAlerts] = useState([]);
+  const [alerts, setAlerts] = useState(alertsData);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [severityFilter, setSeverityFilter] = useState('');
   const [unitFilter, setUnitFilter] = useState('');
 
   useEffect(() => {
-    fetchAlerts().then(setAlerts);
+    fetchAlerts()
+      .then(data => { if (data && data.length) setAlerts(data); })
+      .finally(() => setLoading(false));
   }, []);
 
   const handleAcknowledge = async (id) => {
     await updateAlertStatus(id, ALERT_STATUS.ACKNOWLEDGED);
-    const updated = await fetchAlerts();
+    const updated = await fetchAlerts(true);
     setAlerts(updated);
   };
 
   const handleReview = async (id) => {
     await updateAlertStatus(id, ALERT_STATUS.REVIEWED);
-    const updated = await fetchAlerts();
+    const updated = await fetchAlerts(true);
     setAlerts(updated);
   };
 
-  let filtered = filterBySearch(alerts, search, ['title', 'unit', 'personnel_name']);
-  if (severityFilter) filtered = filtered.filter(a => a.severity === severityFilter);
+  // Dynamic unit options from live alerts
+  const availableUnits = Array.from(
+    new Set(alerts.map(a => a.unit).filter(Boolean))
+  ).sort();
+  const unitOptions = availableUnits.length > 0
+    ? availableUnits.map(u => ({ value: u, label: u }))
+    : UNITS.map(u => ({ value: u, label: u }));
+
+  let filtered = filterBySearch(alerts, search, ['title', 'unit', 'personnel_name', 'description']);
+  if (severityFilter) filtered = filtered.filter(a => a.severity?.toLowerCase() === severityFilter.toLowerCase());
   if (unitFilter) filtered = filtered.filter(a => a.unit === unitFilter);
 
-  const activeCount = alerts.filter(a => a.status === ALERT_STATUS.ACTIVE).length;
-  const criticalCount = alerts.filter(a => a.severity === ALERT_SEVERITY.CRITICAL && a.status === ALERT_STATUS.ACTIVE).length;
-  const reviewedCount = alerts.filter(a => a.status === ALERT_STATUS.REVIEWED).length;
+  const isAlertActive = (a) => a.status === ALERT_STATUS.ACTIVE || a.status === 'active' || a.status === 'new';
+  const isAlertReviewed = (a) => a.status === ALERT_STATUS.REVIEWED || a.status === 'reviewed' || a.status === 'resolved';
+
+  const activeCount = alerts.filter(isAlertActive).length;
+  const criticalCount = alerts.filter(a => (a.severity?.toLowerCase() === 'critical') && isAlertActive(a)).length;
+  const reviewedCount = alerts.filter(isAlertReviewed).length;
 
   const filters = [
     {
@@ -58,7 +73,7 @@ export default function CommanderAlerts() {
       label: 'All Units',
       value: unitFilter,
       onChange: setUnitFilter,
-      options: UNITS.map(u => ({ value: u, label: u })),
+      options: unitOptions,
     },
   ];
 
@@ -105,7 +120,13 @@ export default function CommanderAlerts() {
         </div>
 
         <div className={styles.alertsList}>
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: 'var(--space-8)', color: 'var(--color-text-tertiary)' }}>
+              <div style={{ fontSize: '1.75rem', marginBottom: '8px' }}>🔔</div>
+              <div style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>Loading Early Warning Alerts...</div>
+              <div style={{ fontSize: '0.85rem', marginTop: '4px' }}>Connecting to unit surveillance stream</div>
+            </div>
+          ) : filtered.length === 0 ? (
             <p style={{ color: 'var(--color-text-tertiary)', fontSize: 'var(--font-size-sm)', textAlign: 'center', padding: 'var(--space-8)' }}>
               No alerts match the current filters.
             </p>

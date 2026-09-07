@@ -57,18 +57,56 @@ class ApiService {
   /* =======================================================
      AUTH: POST /api/v1/auth/login
      ======================================================= */
-  async login(personnelId: string, password?: string): Promise<{ token: string; profile: PersonnelProfile }> {
+  async login(
+    personnelId: string,
+    password?: string,
+    requestedRole?: string
+  ): Promise<{ token: string; profile: PersonnelProfile }> {
     if (!personnelId.trim()) {
       throw new Error('Please enter your Personnel ID or Username.');
     }
 
-    // Attempt real backend authentication first
+    const cleanUsername = personnelId.trim().toLowerCase();
+
+    // Check locally registered users first if available
+    try {
+      const stored = localStorage.getItem('sahyogx_registered_users');
+      if (stored) {
+        const regUsers = JSON.parse(stored);
+        const userRec = regUsers[cleanUsername];
+        if (userRec) {
+          if (password && userRec.password && userRec.password !== password) {
+            throw new Error('Incorrect password for registered account.');
+          }
+          const token = `token-reg-${Date.now()}`;
+          sessionStorage.setItem(STORAGE_KEYS.TOKEN, token);
+          const fRole = userRec.role || requestedRole || 'PERSONNEL';
+          const profile: PersonnelProfile = {
+            id: `usr-${cleanUsername}`,
+            personnelId: cleanUsername.toUpperCase(),
+            name: userRec.fullName || cleanUsername.toUpperCase(),
+            rank: userRec.rank || (fRole === 'COMMANDER' ? 'Colonel' : fRole === 'MEDICAL_OFFICER' ? 'Major (Medical)' : 'Havildar'),
+            unit: userRec.unit || '14 Rajputana Rifles',
+            station: 'Forward Base Northern Sector',
+            serviceYears: 6,
+            tradeSpecialty: fRole === 'COMMANDER' ? 'Commanding Officer' : fRole === 'MEDICAL_OFFICER' ? 'Medical Officer' : 'Tactical Signals Specialist',
+            emailContact: `${cleanUsername}@sahyogx.internal`,
+            role: fRole,
+          };
+          return { token, profile };
+        }
+      }
+    } catch (e: any) {
+      if (e.message?.includes('Incorrect password')) throw e;
+    }
+
+    // Attempt real backend authentication
     try {
       const endpoint = `${API_BASE_URL}/api/v1/auth/login`;
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: personnelId.trim(), password: password || '' })
+        body: JSON.stringify({ username: cleanUsername, password: password || '' })
       });
 
       if (res.ok) {
@@ -87,17 +125,26 @@ class ApiService {
             });
             if (meRes.ok) {
               const user = await meRes.json();
+              const backendRole: string = (user.role || requestedRole || 'PERSONNEL').toUpperCase();
+              let frontendRole: string;
+              if (backendRole === 'COMMANDER') {
+                frontendRole = 'COMMANDER';
+              } else if (backendRole === 'MEDICAL_OFFICER') {
+                frontendRole = 'MEDICAL_OFFICER';
+              } else {
+                frontendRole = 'PERSONNEL';
+              }
               const profile: PersonnelProfile = {
-                id: String(user.id || 'usr-882914'),
-                personnelId: (user.username || personnelId).toUpperCase(),
-                name: user.full_name || 'Havildar Rajesh Kumar',
-                rank: 'Havildar',
-                unit: '14 Rajputana Rifles (Bravo Coy)',
+                id: String(user.id || 'usr-prs-003'),
+                personnelId: (user.username || cleanUsername).toUpperCase(),
+                name: user.full_name || (frontendRole === 'COMMANDER' ? 'Col. R. Sharma (Commanding Officer)' : frontendRole === 'MEDICAL_OFFICER' ? 'Maj. Dr. A. Verma (Regimental Medical Officer)' : 'Hav. K. Singh'),
+                rank: frontendRole === 'COMMANDER' ? 'Colonel' : frontendRole === 'MEDICAL_OFFICER' ? 'Major (Medical)' : 'Havildar',
+                unit: '14 Rajputana Rifles',
                 station: 'Forward Base Northern Sector',
                 serviceYears: 9,
-                tradeSpecialty: 'Tactical Signals Specialist',
-                emailContact: user.email || `${user.username}@sahyogx.internal`,
-                role: 'personnel'
+                tradeSpecialty: frontendRole === 'COMMANDER' ? 'Commanding Officer' : frontendRole === 'MEDICAL_OFFICER' ? 'Medical Officer' : 'Tactical Signals Specialist',
+                emailContact: user.email || `${cleanUsername}@sahyogx.internal`,
+                role: frontendRole
               };
               return { token, profile };
             }
@@ -105,9 +152,16 @@ class ApiService {
             // Profile fetch fallback
           }
 
+          const resolvedRole = (cleanUsername.includes('cmd') || cleanUsername.includes('command') || requestedRole === 'COMMANDER')
+            ? 'COMMANDER'
+            : (cleanUsername.includes('med') || cleanUsername.includes('welfare') || cleanUsername.includes('officer') || requestedRole === 'MEDICAL_OFFICER')
+            ? 'MEDICAL_OFFICER'
+            : 'PERSONNEL';
+
           const profile = {
             ...MOCK_PERSONNEL_PROFILE,
-            personnelId: personnelId.toUpperCase()
+            personnelId: cleanUsername.toUpperCase(),
+            role: resolvedRole,
           };
           return { token, profile };
         }
@@ -116,29 +170,89 @@ class ApiService {
         throw new Error(errorData?.detail || 'Authentication failed. Check your credentials.');
       }
     } catch (err: any) {
-      // If error is explicit auth rejection from backend, re-throw it
       if (err.message && (err.message.includes('Authentication failed') || err.message.includes('Incorrect') || err.message.includes('credentials') || err.message.includes('required') || err.message.includes('deactivated'))) {
         throw err;
       }
-      // If an explicit API_BASE_URL was provided and failed due to network, surface it
       if (!USE_MOCK && API_BASE_URL) {
         throw new Error('Backend authentication service unavailable. Check connection.');
       }
     }
 
-    // Development / Mock fallback when backend server is not running
-    await delay(300);
+    // Development / Mock fallback when backend is unreachable
+    await delay(100);
     const token = `mock-token-${Date.now()}`;
     sessionStorage.setItem(STORAGE_KEYS.TOKEN, token);
-    const profile = {
+    const resolvedRole = requestedRole || (
+      cleanUsername.includes('cmd') || cleanUsername.includes('command') ? 'COMMANDER'
+      : cleanUsername.includes('med') || cleanUsername.includes('verma') || cleanUsername.includes('welfare') ? 'MEDICAL_OFFICER'
+      : 'PERSONNEL'
+    );
+    const profile: PersonnelProfile = {
       ...MOCK_PERSONNEL_PROFILE,
-      personnelId: personnelId.toUpperCase()
+      personnelId: cleanUsername.toUpperCase(),
+      name: resolvedRole === 'COMMANDER' ? 'Col. R. Sharma (Commanding Officer)' : resolvedRole === 'MEDICAL_OFFICER' ? 'Maj. Dr. A. Verma (Regimental Medical Officer)' : 'Havildar Rajesh Kumar',
+      rank: resolvedRole === 'COMMANDER' ? 'Colonel' : resolvedRole === 'MEDICAL_OFFICER' ? 'Major (Medical)' : 'Havildar',
+      role: resolvedRole,
     };
     return { token, profile };
   }
 
+  /* =======================================================
+     AUTH: POST /api/v1/auth/register
+     ======================================================= */
+  async register(data: {
+    username: string;
+    password: string;
+    role: string;
+    fullName?: string;
+    rank?: string;
+    unit?: string;
+  }): Promise<{ token: string; profile: PersonnelProfile }> {
+    const cleanUsername = data.username.trim().toLowerCase();
+    
+    // 1. Try registering with backend
+    try {
+      const endpoint = `${API_BASE_URL}/api/v1/auth/register`;
+      await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: cleanUsername,
+          password: data.password,
+          role: data.role,
+          full_name: data.fullName || cleanUsername.toUpperCase(),
+        }),
+      });
+    } catch {
+      // Ignore network errors on register — will save locally
+    }
+
+    // 2. Persist in local storage so next time only login is needed
+    try {
+      const stored = localStorage.getItem('sahyogx_registered_users');
+      const regUsers = stored ? JSON.parse(stored) : {};
+      regUsers[cleanUsername] = {
+        username: cleanUsername,
+        password: data.password,
+        role: data.role,
+        fullName: data.fullName,
+        rank: data.rank,
+        unit: data.unit,
+        registeredAt: new Date().toISOString(),
+      };
+      localStorage.setItem('sahyogx_registered_users', JSON.stringify(regUsers));
+    } catch {
+      // ignore
+    }
+
+    // 3. Immediately log in the registered user
+    return this.login(cleanUsername, data.password, data.role);
+  }
+
   logout(): void {
     sessionStorage.removeItem(STORAGE_KEYS.TOKEN);
+    localStorage.removeItem('sahyogx_token');
+    localStorage.removeItem(STORAGE_KEYS.TOKEN);
   }
 
   isAuthenticated(): boolean {
@@ -149,24 +263,51 @@ class ApiService {
      PROFILE: GET /api/v1/auth/me
      ======================================================= */
   async getProfile(): Promise<PersonnelProfile> {
+    // 1. Instant return from session cache if available
+    try {
+      const saved = sessionStorage.getItem('sahyogx_session_profile');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+
     const token = sessionStorage.getItem(STORAGE_KEYS.TOKEN);
-    if (token && !token.startsWith('mock-token-')) {
+    if (token && !token.startsWith('mock-token-') && !token.startsWith('token-reg-')) {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/v1/auth/me`, { headers: this.getHeaders() });
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 600);
+        const res = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
+          headers: this.getHeaders(),
+          signal: controller.signal,
+        });
+        clearTimeout(timer);
+
         if (res.ok) {
           const user = await res.json();
-          return {
-            id: String(user.id || 'usr-882914'),
+          // Read the actual role from the backend JWT response
+          const backendRole: string = (user.role || 'PERSONNEL').toUpperCase();
+          let frontendRole: string;
+          if (backendRole === 'COMMANDER') {
+            frontendRole = 'COMMANDER';
+          } else if (backendRole === 'MEDICAL_OFFICER') {
+            frontendRole = 'MEDICAL_OFFICER';
+          } else {
+            frontendRole = 'PERSONNEL';
+          }
+          const profile: PersonnelProfile = {
+            id: String(user.id || 'usr-prs-003'),
             personnelId: (user.username || 'SF-882914').toUpperCase(),
-            name: user.full_name || 'Havildar Rajesh Kumar',
-            rank: 'Havildar',
-            unit: '14 Rajputana Rifles (Bravo Coy)',
+            name: user.full_name || (frontendRole === 'COMMANDER' ? 'Col. R. Sharma (Commanding Officer)' : frontendRole === 'MEDICAL_OFFICER' ? 'Maj. Dr. A. Verma (Regimental Medical Officer)' : 'Hav. K. Singh'),
+            rank: frontendRole === 'COMMANDER' ? 'Colonel' : frontendRole === 'MEDICAL_OFFICER' ? 'Major (Medical)' : 'Havildar',
+            unit: '14 Rajputana Rifles',
             station: 'Forward Base Northern Sector',
             serviceYears: 9,
-            tradeSpecialty: 'Tactical Signals Specialist',
+            tradeSpecialty: frontendRole === 'COMMANDER' ? 'Commanding Officer' : frontendRole === 'MEDICAL_OFFICER' ? 'Medical Officer' : 'Tactical Signals Specialist',
             emailContact: user.email || `${user.username}@sahyogx.internal`,
-            role: 'personnel'
+            role: frontendRole
           };
+          try {
+            sessionStorage.setItem('sahyogx_session_profile', JSON.stringify(profile));
+          } catch {}
+          return profile;
         }
       } catch {
         // Fallback to local profile

@@ -7,17 +7,49 @@ import {
 import Header from '../../components/Header/Header';
 import ChartCard from '../../components/ChartCard/ChartCard';
 import { fetchOfficerAnalytics } from '../../api/analyticsApi';
+import {
+  riskDistribution,
+  riskTrendData,
+  workloadTrendData,
+  dutyHourTrendData,
+  deploymentTrendData,
+  leaveTrendData,
+} from '../../mocks';
 import { CHART_COLORS } from '../../utils/constants';
 import styles from '../Pages.module.css';
 
+const initialAnalytics = {
+  risk_distribution: riskDistribution,
+  risk_trend: riskTrendData,
+  workload_trend: workloadTrendData,
+  duty_hour_trend: dutyHourTrendData,
+  deployment_trend: deploymentTrendData,
+  leave_trend: leaveTrendData,
+};
+
 export default function RiskAnalytics() {
-  const [analytics, setAnalytics] = useState(null);
+  const [analytics, setAnalytics] = useState(initialAnalytics);
 
   useEffect(() => {
-    fetchOfficerAnalytics().then(setAnalytics);
+    fetchOfficerAnalytics().then(data => { if (data) setAnalytics(data); });
   }, []);
 
-  if (!analytics) return null;
+  if (!analytics) return (
+    <>
+      <Header
+        title="Risk Analytics"
+        breadcrumbs={[
+          { label: 'Dashboard', to: '/officer' },
+          { label: 'Risk Analytics' },
+        ]}
+      />
+      <div style={{ padding: 'var(--space-8)', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
+        <div style={{ fontSize: '1.75rem', marginBottom: '8px' }}>📊</div>
+        <div style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>Loading Risk Analytics...</div>
+        <div style={{ fontSize: '0.875rem', marginTop: '4px' }}>Compiling psychological & physiological risk indicators</div>
+      </div>
+    </>
+  );
 
   const tooltipStyle = {
     backgroundColor: 'var(--color-surface)',

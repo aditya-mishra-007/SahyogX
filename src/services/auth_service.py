@@ -136,3 +136,51 @@ def authenticate_user(username: str, password: str) -> Optional[UserInDB]:
     if not verify_password(password, user.password_hash):
         return None
     return user
+
+
+async def register_user_async(
+    username: str,
+    password: str,
+    role: UserRole = UserRole.PERSONNEL,
+    full_name: Optional[str] = None,
+    db: Optional[AsyncSession] = None,
+) -> UserInDB:
+    """
+    Registers a new user in the system (in-memory registry and database if available).
+    """
+    clean_username = username.strip().lower()
+    hashed_pwd = get_password_hash(password)
+    user_id = f"usr-{clean_username[:12]}"
+    
+    new_user = UserInDB(
+        id=user_id,
+        username=clean_username,
+        password_hash=hashed_pwd,
+        role=role,
+        full_name=full_name or f"Soldier {clean_username.upper()}",
+        is_active=True,
+    )
+    
+    # Store in static registry for instant lookup
+    _PHASE1_DEV_USERS[clean_username] = new_user
+    
+    # Also save to DB if available
+    if db is not None:
+        try:
+            db_user = User(
+                id=user_id,
+                username=clean_username,
+                password_hash=hashed_pwd,
+                role=role.value,
+                full_name=new_user.full_name,
+                is_active=True,
+            )
+            db.add(db_user)
+            await db.commit()
+            await db.refresh(db_user)
+        except Exception as exc:
+            logger.debug(f"DB user save skipped or already exists: {exc}")
+            await db.rollback()
+            
+    return new_user
+

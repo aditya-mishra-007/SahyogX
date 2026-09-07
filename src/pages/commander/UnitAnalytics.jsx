@@ -6,22 +6,56 @@ import {
 import Header from '../../components/Header/Header';
 import ChartCard from '../../components/ChartCard/ChartCard';
 import { fetchUnitAnalytics, fetchOfficerAnalytics } from '../../api/analyticsApi';
+import { unitsData, unitComparisonData, workloadTrendData, deploymentTrendData } from '../../mocks';
 import { CHART_COLORS } from '../../utils/constants';
 import styles from '../Pages.module.css';
 
+const initialUnitData = {
+  units: unitsData,
+  unit_comparison: unitComparisonData,
+  force_average_risk_score: 35,
+  highest_risk_unit: 'Alpha Company',
+};
+
+const initialAnalytics = {
+  workload_trend: workloadTrendData,
+  deployment_trend: deploymentTrendData,
+};
+
 export default function UnitAnalytics() {
-  const [unitData, setUnitData] = useState(null);
-  const [analytics, setAnalytics] = useState(null);
+  const [unitData, setUnitData] = useState(initialUnitData);
+  const [analytics, setAnalytics] = useState(initialAnalytics);
 
   useEffect(() => {
-    fetchUnitAnalytics().then(setUnitData);
-    fetchOfficerAnalytics().then(setAnalytics);
+    fetchUnitAnalytics().then(data => { if (data) setUnitData(data); });
+    fetchOfficerAnalytics().then(data => { if (data) setAnalytics(data); });
   }, []);
 
-  if (!unitData || !analytics) return (
+
+  if (!unitData) return (
     <>
-      <Header title="Unit Analytics" />
-      <div style={{ padding: 'var(--space-6)', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>Loading...</div>
+      <Header
+        title="Unit Analytics"
+        breadcrumbs={[
+          { label: 'Dashboard', to: '/commander' },
+          { label: 'Unit Analytics' },
+        ]}
+      />
+      <div style={{ padding: 'var(--space-8)', maxWidth: 'var(--content-max-width)', margin: '0 auto', textAlign: 'center' }}>
+        <div style={{
+          background: 'var(--color-surface)',
+          border: '1px solid var(--color-border)',
+          borderRadius: '12px',
+          padding: 'var(--space-8)',
+          boxShadow: 'var(--shadow-sm)'
+        }}>
+          <div style={{ fontSize: '2rem', marginBottom: '12px' }}>📊</div>
+          <div style={{ fontWeight: 600, fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>Loading Unit Analytics...</div>
+          <div style={{ fontSize: '0.875rem', color: 'var(--color-text-tertiary)', marginTop: '4px' }}>
+            Aggregating company-level operational metrics and stress distribution
+          </div>
+        </div>
+      </div>
     </>
   );
 
@@ -32,21 +66,24 @@ export default function UnitAnalytics() {
     fontSize: '13px',
   };
 
+  const comparison = unitData.unit_comparison || [];
+  const units = unitData.units || [];
+
   // Radar data from unit comparison
-  const radarData = unitData.unit_comparison.map(u => ({
-    unit: u.name,
-    risk: u.risk_score,
-    workload: u.workload,
-    deployment: Math.min(100, u.deployment),
-    leave: u.leave * 3, // scale for visibility
+  const radarData = comparison.map(u => ({
+    unit: u.name || 'Unit',
+    risk: u.risk_score || 0,
+    workload: u.workload || 50,
+    deployment: Math.min(100, u.deployment || 60),
+    leave: (u.leave || 10) * 3, // scale for visibility
   }));
 
   // Unit risk distribution data
-  const riskDistData = unitData.units.map(u => ({
-    name: u.name.replace(' Company', '').replace('HQ ', ''),
-    Low: u.risk_distribution.low,
-    Moderate: u.risk_distribution.moderate,
-    Elevated: u.risk_distribution.elevated,
+  const riskDistData = units.map(u => ({
+    name: (u.name || u.unit || 'Unit').replace(' Company', '').replace('HQ ', ''),
+    Low: u.risk_distribution?.low ?? (u.risk_breakdown?.low || 0),
+    Moderate: u.risk_distribution?.moderate ?? (u.risk_breakdown?.moderate || 0),
+    Elevated: u.risk_distribution?.elevated ?? ((u.risk_breakdown?.high || 0) + (u.risk_breakdown?.critical || 0)),
   }));
 
   return (
@@ -120,7 +157,7 @@ export default function UnitAnalytics() {
         <div className={styles.chartsGrid}>
           <ChartCard title="Workload Trend (Historical)" subtitle="Average workload over time">
             <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={analytics.workload_trend}>
+              <BarChart data={analytics?.workload_trend || []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                 <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="var(--color-text-tertiary)" />
                 <YAxis tick={{ fontSize: 12 }} stroke="var(--color-text-tertiary)" />
@@ -133,7 +170,7 @@ export default function UnitAnalytics() {
 
           <ChartCard title="Deployment Trend (Historical)" subtitle="Average deployment duration over time">
             <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={analytics.deployment_trend}>
+              <BarChart data={analytics?.deployment_trend || []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                 <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="var(--color-text-tertiary)" />
                 <YAxis tick={{ fontSize: 12 }} stroke="var(--color-text-tertiary)" />
