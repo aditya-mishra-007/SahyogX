@@ -129,3 +129,8 @@ ml/data/raw/*.parquet
 ml/data/raw/*_large.csv
 *.tar.gz
 *.zip
+
+# Frontend build & dependencies
+node_modules/
+.vite/
+dist/
