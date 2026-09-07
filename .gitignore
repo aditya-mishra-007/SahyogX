@@ -122,3 +122,10 @@ dmypy.json
 # OS generated
 .DS_Store
 Thumbs.db
+
+
+# Large ML datasets / checkpoints
+ml/data/raw/*.parquet
+ml/data/raw/*_large.csv
+*.tar.gz
+*.zip
