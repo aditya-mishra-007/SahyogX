@@ -1,4 +1,4 @@
-# 🇮🇳 SahyogX — AI-Based Predictive Personnel Stress & Welfare Monitoring System
+# SahyogX — AI-Based Predictive Personnel Stress & Welfare Monitoring System
 
 > **Smart India Hackathon (SIH)** | **Problem Statement:** AI-Based Predictive Personnel Stress and Welfare Monitoring System for Uniformed Forces  
 > **Live Web Portal (Vercel):** [SahyogX Production Portal](https://sahyog-x.vercel.app) *(or your Vercel URL)*  
