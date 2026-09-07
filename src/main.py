@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
     Application lifespan manager.
-    Handles startup logging, database liveliness check, and graceful shutdown.
+    Handles startup logging, automatic database table creation, connectivity check, and graceful shutdown.
     """
     logger.info(f"============================================================")
     logger.info(f" Starting {settings.APP_NAME} v{settings.APP_VERSION}")
@@ -32,10 +32,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info(f" Allowed CORS Origins: {settings.CORS_ORIGINS}")
     logger.info(f"============================================================")
 
-    # Perform startup database connectivity check
+    # Perform startup database connectivity check and auto table creation
     db_connected, db_msg = await check_db_connection()
     if db_connected:
         logger.info(f"Database connection verified: {db_msg}")
+        try:
+            from src.models import Base
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            logger.info("Database tables verified and created successfully.")
+        except Exception as exc:
+            logger.warning(f"Database table auto-creation notice: {exc}")
     else:
         logger.warning(
             f"Database connectivity check: {db_msg}. "
