@@ -232,7 +232,7 @@ export default function PersonnelList() {
               padding: '8px 16px',
               borderRadius: '8px',
               backgroundColor: 'var(--color-primary)',
-              color: '#0f172a',
+              color: '#ffffff',
               fontWeight: 600,
               fontSize: '0.85rem',
               border: 'none',

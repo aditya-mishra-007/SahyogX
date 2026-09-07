@@ -9,7 +9,7 @@ import {
   Bell,
 } from 'lucide-react';
 import {
-  PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend
 } from 'recharts';
 import Header from '../../components/Header/Header';
 import StatCard from '../../components/StatCard/StatCard';
@@ -119,29 +119,88 @@ export default function OfficerOverview() {
         <div className={styles.chartsGrid}>
           <ChartCard title="Welfare Risk Distribution" subtitle="Force-wide risk level breakdown">
             {analytics?.risk_distribution ? (
-              <ResponsiveContainer width="100%" height={260}>
-                <PieChart>
-                  <Pie
-                    data={analytics.risk_distribution}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={85}
-                    innerRadius={48}
-                    paddingAngle={3}
-                    label={({ name, value }) => `${name.replace('Welfare Risk', '').trim()}: ${value}`}
-                    labelLine={false}
-                  >
-                    {analytics.risk_distribution.map((entry, i) => (
-                      <Cell key={i} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {/* Large full-width donut chart */}
+                <ResponsiveContainer width="100%" height={260}>
+                  <PieChart>
+                    <Pie
+                      data={analytics.risk_distribution}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      innerRadius={62}
+                      paddingAngle={4}
+                      label={({ cx, cy, midAngle, innerRadius, outerRadius, value }) => {
+                        const RADIAN = Math.PI / 180;
+                        const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+                        const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                        const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                        return value > 0 ? (
+                          <text x={x} y={y} fill="#fff" textAnchor="middle" dominantBaseline="central" fontSize={15} fontWeight={700}>
+                            {value}
+                          </text>
+                        ) : null;
+                      }}
+                      labelLine={false}
+                    >
+                      {analytics.risk_distribution.map((entry, i) => (
+                        <Cell key={i} fill={entry.fill} stroke="rgba(255,255,255,0.12)" strokeWidth={2} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: 'var(--shadow-md)', fontSize: '13px' }}
+                      itemStyle={{ fontWeight: 600 }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+
+                {/* Horizontal breakdown row below chart */}
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', paddingBottom: '4px' }}>
+                  {(() => {
+                    const total = analytics.risk_distribution.reduce((s, e) => s + e.value, 0);
+                    return analytics.risk_distribution.map((entry) => {
+                      const pct = total > 0 ? Math.round((entry.value / total) * 100) : 0;
+                      // shorten long names
+                      const shortName = entry.name.replace('Welfare Risk', '').replace('Risk', '').trim();
+                      return (
+                        <div key={entry.name} style={{
+                          flex: '1 1 0',
+                          minWidth: 80,
+                          padding: '10px 12px',
+                          borderRadius: '10px',
+                          backgroundColor: 'var(--color-surface-hover, #F1F5F9)',
+                          border: `2px solid ${entry.fill}30`,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '4px',
+                          alignItems: 'flex-start',
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: entry.fill }} />
+                            <span style={{ fontSize: '0.72rem', color: 'var(--color-text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                              {shortName}
+                            </span>
+                          </div>
+                          <span style={{ fontSize: '1.4rem', fontWeight: 800, color: entry.fill, lineHeight: 1 }}>
+                            {entry.value}
+                          </span>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>
+                            {pct}% of unit
+                          </span>
+                          {/* mini bar */}
+                          <div style={{ width: '100%', height: 4, borderRadius: 2, backgroundColor: 'var(--color-border)', marginTop: 2 }}>
+                            <div style={{ height: '100%', width: `${pct}%`, backgroundColor: entry.fill, borderRadius: 2 }} />
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '240px', color: 'var(--color-text-tertiary)', fontSize: '13px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', color: 'var(--color-text-tertiary)', fontSize: '13px' }}>
                 <span>Evaluating unit stress telemetry...</span>
               </div>
             )}

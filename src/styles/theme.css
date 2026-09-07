@@ -144,3 +144,34 @@ button, input, select, textarea {
   font-family: inherit;
   font-size: inherit;
 }
+
+/* Dark Mode Tokens */
+[data-theme="dark"] {
+  --bg-app: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-surface-subtle: #0b1120;
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  
+  --border-subtle: #334155;
+  --border-medium: #475569;
+  
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-surface-hover: #334155;
+  --color-surface-active: #475569;
+  --color-border: #334155;
+  --color-border-light: #1e293b;
+  
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-text-tertiary: #94a3b8;
+  
+  --color-header-bg: #1e293b;
+  --color-header-border: #334155;
+  
+  --color-input-bg: #0f172a;
+  --color-input-border: #475569;
+}

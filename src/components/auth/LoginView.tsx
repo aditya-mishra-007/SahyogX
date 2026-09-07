@@ -26,7 +26,7 @@ export const LoginView: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Role metadata configurations with custom tailored gradients and accents
+  // Role metadata configurations
   const roleConfig = {
     PERSONNEL: {
       label: 'Personnel Login',
@@ -34,13 +34,9 @@ export const LoginView: React.FC = () => {
       subtitle: 'Confidential Welfare, Self-Assessment & Duty Management',
       icon: User,
       buttonText: 'Sign In as Personnel',
-      primaryColor: '#38bdf8',
-      accentGlow: 'rgba(56, 189, 248, 0.25)',
-      btnGradient: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)',
-      btnTextColor: '#031525',
       demoUser: 'SF-882914',
       demoPass: 'ServicePass@2026',
-      placeholder: 'e.g. SF-882914 or personnel',
+      placeholder: 'e.g. SF-882914',
     },
     COMMANDER: {
       label: 'Commander Login',
@@ -48,27 +44,19 @@ export const LoginView: React.FC = () => {
       subtitle: 'Force-Level Operational Readiness & Unit Stress Analytics',
       icon: Shield,
       buttonText: 'Sign In as Commander',
-      primaryColor: '#f59e0b',
-      accentGlow: 'rgba(245, 158, 11, 0.25)',
-      btnGradient: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
-      btnTextColor: '#1c1002',
       demoUser: 'commander',
       demoPass: 'commander123',
-      placeholder: 'e.g. commander or CMD-001',
+      placeholder: 'e.g. CMD-001',
     },
     MEDICAL_OFFICER: {
       label: 'Welfare Officer Login',
       badge: 'Welfare & Medical Officer Portal',
-      subtitle: 'Clinical Risk Stratification, Early Warning Alerts & Interventions',
+      subtitle: 'Clinical Risk Stratification & Early Warning Alerts',
       icon: Stethoscope,
       buttonText: 'Sign In as Welfare Officer',
-      primaryColor: '#10b981',
-      accentGlow: 'rgba(16, 185, 129, 0.25)',
-      btnGradient: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-      btnTextColor: '#022115',
       demoUser: 'medical',
       demoPass: 'medical123',
-      placeholder: 'e.g. medical or WO-001',
+      placeholder: 'e.g. WO-001',
     },
   };
 
@@ -144,119 +132,107 @@ export const LoginView: React.FC = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'radial-gradient(ellipse at 50% 15%, #1e293b 0%, #0b1120 60%, #030712 100%)',
+      // Added a subtle, modern gradient background instead of flat white
+      background: 'linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%)',
       padding: '24px',
-      position: 'relative',
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-      color: '#f8fafc',
+      color: 'var(--color-text-primary, #0F172A)',
+      position: 'relative',
     }}>
-      {/* Ambient background decoration */}
+      {/* Decorative background elements to make it less plain */}
       <div style={{
         position: 'absolute',
-        top: '10%',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: '600px',
-        height: '350px',
-        background: `radial-gradient(ellipse, ${currentRole.accentGlow} 0%, transparent 70%)`,
-        filter: 'blur(60px)',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '40vh',
+        background: 'linear-gradient(180deg, rgba(27, 42, 74, 0.03) 0%, transparent 100%)',
         pointerEvents: 'none',
-        zIndex: 0,
-        transition: 'background 0.5s ease',
       }} />
-
-      {/* Main Unified Glassmorphic Card */}
+      
       <div style={{
+        maxWidth: '480px',
+        width: '100%',
+        backgroundColor: 'var(--color-surface, #FFFFFF)',
+        borderRadius: '20px',
+        border: '1px solid rgba(255, 255, 255, 0.8)',
+        // Improved shadow for better depth
+        boxShadow: '0 20px 40px -15px rgba(15, 23, 42, 0.1), 0 0 10px rgba(15, 23, 42, 0.02)',
+        overflow: 'hidden',
         position: 'relative',
         zIndex: 1,
-        maxWidth: '460px',
-        width: '100%',
-        background: 'rgba(15, 23, 42, 0.92)',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-        borderRadius: '24px',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        boxShadow: `0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 35px -5px ${currentRole.accentGlow}`,
-        overflow: 'hidden',
-        transition: 'box-shadow 0.4s ease',
       }}>
-
-        {/* Unified Card Header */}
+        {/* Top brand accent bar */}
         <div style={{
-          padding: '32px 28px 20px 28px',
-          textAlign: 'center',
-          position: 'relative',
-        }}>
-          {/* Logo Badge */}
+          height: '6px',
+          width: '100%',
+          background: 'linear-gradient(90deg, #1B2A4A 0%, #3B82F6 100%)',
+        }} />
+
+        {/* Card Header */}
+        <div style={{ padding: '40px 32px 24px 32px', textAlign: 'center' }}>
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '58px',
-            height: '58px',
+            width: '64px',
+            height: '64px',
             borderRadius: '16px',
-            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9))',
-            border: `1px solid ${currentRole.primaryColor}50`,
-            boxShadow: `0 8px 24px -4px ${currentRole.accentGlow}`,
-            marginBottom: '14px',
-            transition: 'all 0.3s ease',
+            backgroundColor: 'var(--color-primary-light, #e8f0fe)',
+            color: 'var(--color-primary, #1B2A4A)',
+            marginBottom: '20px',
+            boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.5), 0 4px 8px rgba(27, 42, 74, 0.06)',
           }}>
-            <IconComponent size={28} color={currentRole.primaryColor} />
+            <IconComponent size={32} />
           </div>
 
-          {/* Role Pill */}
           <div>
             <span style={{
               display: 'inline-block',
-              padding: '4px 14px',
+              padding: '6px 16px',
               borderRadius: '20px',
-              fontSize: '0.72rem',
+              fontSize: '0.75rem',
               fontWeight: 700,
-              letterSpacing: '0.06em',
+              letterSpacing: '0.05em',
               textTransform: 'uppercase',
-              background: `${currentRole.primaryColor}18`,
-              color: currentRole.primaryColor,
-              border: `1px solid ${currentRole.primaryColor}35`,
-              marginBottom: '10px',
-              transition: 'all 0.3s ease',
+              backgroundColor: 'var(--color-accent-bg, rgba(59, 130, 246, 0.08))',
+              color: 'var(--color-accent, #3B82F6)',
+              marginBottom: '12px',
+              border: '1px solid rgba(59, 130, 246, 0.15)'
             }}>
               {currentRole.badge}
             </span>
           </div>
 
-          {/* Title & Subtitle */}
           <h1 style={{
-            fontSize: '1.6rem',
+            fontSize: '1.75rem',
             fontWeight: 800,
-            color: '#ffffff',
-            margin: '0 0 6px 0',
-            letterSpacing: '-0.025em',
+            color: 'var(--color-text-primary, #0F172A)',
+            margin: '0 0 8px 0',
+            letterSpacing: '-0.02em'
           }}>
             {mode === 'login' ? currentRole.label : 'Register New Account'}
           </h1>
           <p style={{
-            fontSize: '0.84rem',
-            color: '#94a3b8',
+            fontSize: '0.9rem',
+            color: 'var(--color-text-secondary, #475569)',
             margin: 0,
-            lineHeight: 1.45,
+            lineHeight: 1.5,
           }}>
             {mode === 'login' ? currentRole.subtitle : 'Enter your credentials once. Next time simply Sign In.'}
           </p>
         </div>
 
         {/* 3-Role Segmented Selector */}
-        <div style={{
-          padding: '0 24px',
-          marginBottom: '14px',
-        }}>
+        <div style={{ padding: '0 32px', marginBottom: '20px' }}>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
-            background: 'rgba(2, 6, 23, 0.65)',
-            padding: '4px',
+            backgroundColor: 'var(--color-surface-hover, #F1F5F9)',
+            padding: '6px',
             borderRadius: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            gap: '4px',
+            border: '1px solid var(--color-border, #E2E8F0)',
+            gap: '6px',
           }}>
             {(['PERSONNEL', 'COMMANDER', 'MEDICAL_OFFICER'] as BackendRole[]).map((r) => {
               const isSelected = selectedRole === r;
@@ -275,16 +251,16 @@ export const LoginView: React.FC = () => {
                     padding: '8px 2px',
                     borderRadius: '8px',
                     border: 'none',
-                    background: isSelected ? 'rgba(30, 41, 59, 0.95)' : 'transparent',
-                    color: isSelected ? '#ffffff' : '#64748b',
+                    backgroundColor: isSelected ? 'var(--color-surface, #FFFFFF)' : 'transparent',
+                    color: isSelected ? 'var(--color-primary, #1B2A4A)' : 'var(--color-text-secondary, #475569)',
                     fontSize: '0.78rem',
-                    fontWeight: isSelected ? 700 : 500,
+                    fontWeight: isSelected ? 600 : 500,
                     cursor: 'pointer',
-                    boxShadow: isSelected ? '0 2px 8px rgba(0,0,0,0.3)' : 'none',
+                    boxShadow: isSelected ? 'var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.1))' : 'none',
                     transition: 'all 0.2s ease',
                   }}
                 >
-                  <TabIcon size={13} color={isSelected ? rCfg.primaryColor : '#64748b'} />
+                  <TabIcon size={13} />
                   <span>{r === 'PERSONNEL' ? 'Personnel' : r === 'COMMANDER' ? 'Commander' : 'Officer'}</span>
                 </button>
               );
@@ -292,17 +268,14 @@ export const LoginView: React.FC = () => {
           </div>
         </div>
 
-        {/* Mode Pill Toggle (Sign In vs Register) */}
-        <div style={{
-          padding: '0 24px',
-          marginBottom: '20px',
-        }}>
+        {/* Mode Pill Toggle */}
+        <div style={{ padding: '0 24px', marginBottom: '20px' }}>
           <div style={{
             display: 'flex',
-            background: 'rgba(2, 6, 23, 0.4)',
+            backgroundColor: 'var(--color-surface-hover, #F1F5F9)',
             borderRadius: '10px',
-            padding: '3px',
-            border: '1px solid rgba(255, 255, 255, 0.06)',
+            padding: '4px',
+            border: '1px solid var(--color-border, #E2E8F0)',
           }}>
             <button
               type="button"
@@ -310,13 +283,14 @@ export const LoginView: React.FC = () => {
               style={{
                 flex: 1,
                 padding: '8px 0',
-                borderRadius: '8px',
+                borderRadius: '6px',
                 border: 'none',
-                background: mode === 'login' ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
-                color: mode === 'login' ? '#ffffff' : '#64748b',
+                backgroundColor: mode === 'login' ? 'var(--color-surface, #FFFFFF)' : 'transparent',
+                color: mode === 'login' ? 'var(--color-primary, #1B2A4A)' : 'var(--color-text-secondary, #475569)',
                 fontSize: '0.82rem',
-                fontWeight: mode === 'login' ? 700 : 500,
+                fontWeight: mode === 'login' ? 600 : 500,
                 cursor: 'pointer',
+                boxShadow: mode === 'login' ? 'var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.1))' : 'none',
                 transition: 'all 0.2s ease',
               }}
             >
@@ -328,13 +302,14 @@ export const LoginView: React.FC = () => {
               style={{
                 flex: 1,
                 padding: '8px 0',
-                borderRadius: '8px',
+                borderRadius: '6px',
                 border: 'none',
-                background: mode === 'register' ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
-                color: mode === 'register' ? '#ffffff' : '#64748b',
+                backgroundColor: mode === 'register' ? 'var(--color-surface, #FFFFFF)' : 'transparent',
+                color: mode === 'register' ? 'var(--color-primary, #1B2A4A)' : 'var(--color-text-secondary, #475569)',
                 fontSize: '0.82rem',
-                fontWeight: mode === 'register' ? 700 : 500,
+                fontWeight: mode === 'register' ? 600 : 500,
                 cursor: 'pointer',
+                boxShadow: mode === 'register' ? 'var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.1))' : 'none',
                 transition: 'all 0.2s ease',
               }}
             >
@@ -351,10 +326,10 @@ export const LoginView: React.FC = () => {
               alignItems: 'center',
               gap: '10px',
               padding: '12px 14px',
-              borderRadius: '10px',
-              background: 'rgba(239, 68, 68, 0.12)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              color: '#fca5a5',
+              borderRadius: '8px',
+              backgroundColor: 'var(--status-review-bg, #fef2f2)',
+              border: '1px solid var(--status-review-border, #fecaca)',
+              color: 'var(--status-review, #dc2626)',
               fontSize: '0.83rem',
               marginBottom: '16px',
             }}>
@@ -369,10 +344,10 @@ export const LoginView: React.FC = () => {
               alignItems: 'center',
               gap: '10px',
               padding: '12px 14px',
-              borderRadius: '10px',
-              background: 'rgba(34, 197, 94, 0.12)',
-              border: '1px solid rgba(34, 197, 94, 0.3)',
-              color: '#86efac',
+              borderRadius: '8px',
+              backgroundColor: 'var(--status-optimal-bg, #ecfdf5)',
+              border: '1px solid var(--status-optimal-border, #a7f3d0)',
+              color: 'var(--status-optimal, #059669)',
               fontSize: '0.83rem',
               marginBottom: '16px',
             }}>
@@ -382,14 +357,13 @@ export const LoginView: React.FC = () => {
           )}
 
           {mode === 'login' ? (
-            /* ================= LOGIN MODE ================= */
             <form onSubmit={handleLoginSubmit}>
               <div style={{ marginBottom: '16px' }}>
                 <label style={{
                   display: 'block',
                   fontSize: '0.8rem',
                   fontWeight: 600,
-                  color: '#94a3b8',
+                  color: 'var(--color-text-secondary, #475569)',
                   marginBottom: '6px',
                 }}>
                   {selectedRole === 'PERSONNEL' ? 'Personnel Service Number / ID' : selectedRole === 'COMMANDER' ? 'Commander Username / Service ID' : 'Medical Officer Username / Service ID'}
@@ -403,20 +377,17 @@ export const LoginView: React.FC = () => {
                     style={{
                       width: '100%',
                       padding: '11px 14px 11px 38px',
-                      borderRadius: '10px',
-                      background: 'rgba(2, 6, 23, 0.55)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#f8fafc',
+                      borderRadius: '8px',
+                      backgroundColor: 'var(--color-input-bg, #FFFFFF)',
+                      border: '1px solid var(--color-input-border, #CBD5E1)',
+                      color: 'var(--color-text-primary, #0F172A)',
                       fontSize: '0.92rem',
                       outline: 'none',
                       boxSizing: 'border-box',
-                      transition: 'border-color 0.2s',
                     }}
-                    onFocus={(e) => e.target.style.borderColor = currentRole.primaryColor}
-                    onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.12)'}
                     required
                   />
-                  <User size={16} color="#64748b" style={{ position: 'absolute', left: '13px', top: '13px' }} />
+                  <User size={16} color="var(--color-text-tertiary, #94A3B8)" style={{ position: 'absolute', left: '13px', top: '13px' }} />
                 </div>
               </div>
 
@@ -425,7 +396,7 @@ export const LoginView: React.FC = () => {
                   display: 'block',
                   fontSize: '0.8rem',
                   fontWeight: 600,
-                  color: '#94a3b8',
+                  color: 'var(--color-text-secondary, #475569)',
                   marginBottom: '6px',
                 }}>
                   Security Passcode
@@ -439,63 +410,54 @@ export const LoginView: React.FC = () => {
                     style={{
                       width: '100%',
                       padding: '11px 14px 11px 38px',
-                      borderRadius: '10px',
-                      background: 'rgba(2, 6, 23, 0.55)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#f8fafc',
+                      borderRadius: '8px',
+                      backgroundColor: 'var(--color-input-bg, #FFFFFF)',
+                      border: '1px solid var(--color-input-border, #CBD5E1)',
+                      color: 'var(--color-text-primary, #0F172A)',
                       fontSize: '0.92rem',
                       outline: 'none',
                       boxSizing: 'border-box',
-                      transition: 'border-color 0.2s',
                     }}
-                    onFocus={(e) => e.target.style.borderColor = currentRole.primaryColor}
-                    onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.12)'}
                     required
                   />
-                  <Lock size={16} color="#64748b" style={{ position: 'absolute', left: '13px', top: '13px' }} />
+                  <Lock size={16} color="var(--color-text-tertiary, #94A3B8)" style={{ position: 'absolute', left: '13px', top: '13px' }} />
                 </div>
               </div>
 
-              {/* High-Impact Action Button */}
               <button
                 type="submit"
                 disabled={loading}
                 style={{
                   width: '100%',
-                  padding: '13px',
-                  borderRadius: '10px',
+                  padding: '12px',
+                  borderRadius: '8px',
                   border: 'none',
-                  background: currentRole.btnGradient,
-                  color: currentRole.btnTextColor,
-                  fontWeight: 800,
+                  backgroundColor: 'var(--color-primary, #1B2A4A)',
+                  color: '#FFFFFF',
+                  fontWeight: 600,
                   fontSize: '0.95rem',
                   cursor: loading ? 'wait' : 'pointer',
-                  boxShadow: `0 6px 20px -2px ${currentRole.accentGlow}`,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  letterSpacing: '0.01em',
-                  transition: 'transform 0.15s ease, opacity 0.2s',
                 }}
               >
                 <span>{loading ? 'Authenticating...' : currentRole.buttonText}</span>
                 <ChevronRight size={18} />
               </button>
 
-              {/* Verified Demo Autofill Chip */}
               <div style={{
                 marginTop: '18px',
                 padding: '10px 14px',
-                background: 'rgba(255, 255, 255, 0.03)',
-                borderRadius: '10px',
-                border: '1px dashed rgba(255, 255, 255, 0.1)',
+                backgroundColor: 'var(--color-surface-hover, #F1F5F9)',
+                borderRadius: '8px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 fontSize: '0.78rem',
               }}>
-                <span style={{ color: '#64748b' }}>Demo Quick Credentials:</span>
+                <span style={{ color: 'var(--color-text-secondary, #475569)' }}>Demo Quick Credentials:</span>
                 <button
                   type="button"
                   onClick={() => {
@@ -504,10 +466,10 @@ export const LoginView: React.FC = () => {
                     setError(null);
                   }}
                   style={{
-                    background: 'transparent',
-                    border: `1px solid ${currentRole.primaryColor}40`,
-                    color: currentRole.primaryColor,
-                    padding: '3px 10px',
+                    backgroundColor: 'var(--color-surface, #FFFFFF)',
+                    border: '1px solid var(--color-border, #E2E8F0)',
+                    color: 'var(--color-primary, #1B2A4A)',
+                    padding: '4px 10px',
                     borderRadius: '6px',
                     fontSize: '0.75rem',
                     cursor: 'pointer',
@@ -519,10 +481,9 @@ export const LoginView: React.FC = () => {
               </div>
             </form>
           ) : (
-            /* ================= REGISTER MODE ================= */
             <form onSubmit={handleRegisterSubmit}>
               <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary, #475569)', marginBottom: '6px' }}>
                   Target Authorization Role
                 </label>
                 <select
@@ -532,23 +493,23 @@ export const LoginView: React.FC = () => {
                     width: '100%',
                     padding: '10px 12px',
                     borderRadius: '8px',
-                    background: 'rgba(2, 6, 23, 0.7)',
-                    border: '1px solid rgba(255, 255, 255, 0.14)',
-                    color: '#f8fafc',
+                    backgroundColor: 'var(--color-input-bg, #FFFFFF)',
+                    border: '1px solid var(--color-input-border, #CBD5E1)',
+                    color: 'var(--color-text-primary, #0F172A)',
                     fontSize: '0.88rem',
                     outline: 'none',
                     boxSizing: 'border-box',
                   }}
                 >
-                  <option value="PERSONNEL" style={{ background: '#0f172a' }}>Personnel (Soldier / JCO)</option>
-                  <option value="COMMANDER" style={{ background: '#0f172a' }}>Commanding Officer (Commander)</option>
-                  <option value="MEDICAL_OFFICER" style={{ background: '#0f172a' }}>Welfare / Medical Officer</option>
+                  <option value="PERSONNEL">Personnel (Soldier / JCO)</option>
+                  <option value="COMMANDER">Commanding Officer (Commander)</option>
+                  <option value="MEDICAL_OFFICER">Welfare / Medical Officer</option>
                 </select>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--color-text-secondary, #475569)', marginBottom: '4px' }}>
                     Service ID *
                   </label>
                   <input
@@ -560,9 +521,9 @@ export const LoginView: React.FC = () => {
                       width: '100%',
                       padding: '9px 10px',
                       borderRadius: '8px',
-                      background: 'rgba(2, 6, 23, 0.55)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#f8fafc',
+                      backgroundColor: 'var(--color-input-bg, #FFFFFF)',
+                      border: '1px solid var(--color-input-border, #CBD5E1)',
+                      color: 'var(--color-text-primary, #0F172A)',
                       fontSize: '0.88rem',
                       outline: 'none',
                       boxSizing: 'border-box',
@@ -571,7 +532,7 @@ export const LoginView: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--color-text-secondary, #475569)', marginBottom: '4px' }}>
                     Full Name *
                   </label>
                   <input
@@ -583,9 +544,9 @@ export const LoginView: React.FC = () => {
                       width: '100%',
                       padding: '9px 10px',
                       borderRadius: '8px',
-                      background: 'rgba(2, 6, 23, 0.55)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#f8fafc',
+                      backgroundColor: 'var(--color-input-bg, #FFFFFF)',
+                      border: '1px solid var(--color-input-border, #CBD5E1)',
+                      color: 'var(--color-text-primary, #0F172A)',
                       fontSize: '0.88rem',
                       outline: 'none',
                       boxSizing: 'border-box',
@@ -597,7 +558,7 @@ export const LoginView: React.FC = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--color-text-secondary, #475569)', marginBottom: '4px' }}>
                     Military Rank
                   </label>
                   <input
@@ -609,9 +570,9 @@ export const LoginView: React.FC = () => {
                       width: '100%',
                       padding: '9px 10px',
                       borderRadius: '8px',
-                      background: 'rgba(2, 6, 23, 0.55)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#f8fafc',
+                      backgroundColor: 'var(--color-input-bg, #FFFFFF)',
+                      border: '1px solid var(--color-input-border, #CBD5E1)',
+                      color: 'var(--color-text-primary, #0F172A)',
                       fontSize: '0.88rem',
                       outline: 'none',
                       boxSizing: 'border-box',
@@ -619,7 +580,7 @@ export const LoginView: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--color-text-secondary, #475569)', marginBottom: '4px' }}>
                     Unit / Regt
                   </label>
                   <input
@@ -631,9 +592,9 @@ export const LoginView: React.FC = () => {
                       width: '100%',
                       padding: '9px 10px',
                       borderRadius: '8px',
-                      background: 'rgba(2, 6, 23, 0.55)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#f8fafc',
+                      backgroundColor: 'var(--color-input-bg, #FFFFFF)',
+                      border: '1px solid var(--color-input-border, #CBD5E1)',
+                      color: 'var(--color-text-primary, #0F172A)',
                       fontSize: '0.88rem',
                       outline: 'none',
                       boxSizing: 'border-box',
@@ -644,7 +605,7 @@ export const LoginView: React.FC = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '18px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--color-text-secondary, #475569)', marginBottom: '4px' }}>
                     Set Password *
                   </label>
                   <input
@@ -656,9 +617,9 @@ export const LoginView: React.FC = () => {
                       width: '100%',
                       padding: '9px 10px',
                       borderRadius: '8px',
-                      background: 'rgba(2, 6, 23, 0.55)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#f8fafc',
+                      backgroundColor: 'var(--color-input-bg, #FFFFFF)',
+                      border: '1px solid var(--color-input-border, #CBD5E1)',
+                      color: 'var(--color-text-primary, #0F172A)',
                       fontSize: '0.88rem',
                       outline: 'none',
                       boxSizing: 'border-box',
@@ -667,7 +628,7 @@ export const LoginView: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--color-text-secondary, #475569)', marginBottom: '4px' }}>
                     Confirm Password *
                   </label>
                   <input
@@ -679,9 +640,9 @@ export const LoginView: React.FC = () => {
                       width: '100%',
                       padding: '9px 10px',
                       borderRadius: '8px',
-                      background: 'rgba(2, 6, 23, 0.55)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#f8fafc',
+                      backgroundColor: 'var(--color-input-bg, #FFFFFF)',
+                      border: '1px solid var(--color-input-border, #CBD5E1)',
+                      color: 'var(--color-text-primary, #0F172A)',
                       fontSize: '0.88rem',
                       outline: 'none',
                       boxSizing: 'border-box',
@@ -697,38 +658,19 @@ export const LoginView: React.FC = () => {
                 style={{
                   width: '100%',
                   padding: '12px',
-                  borderRadius: '10px',
+                  borderRadius: '8px',
                   border: 'none',
-                  background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)',
-                  color: '#031525',
-                  fontWeight: 800,
+                  backgroundColor: 'var(--color-primary, #1B2A4A)',
+                  color: '#FFFFFF',
+                  fontWeight: 600,
                   fontSize: '0.92rem',
                   cursor: loading ? 'wait' : 'pointer',
-                  boxShadow: '0 4px 14px rgba(56, 189, 248, 0.35)',
                 }}
               >
                 {loading ? 'Creating Record...' : 'Register & Save Account'}
               </button>
             </form>
           )}
-
-          {/* Footer Security Badge */}
-          <div style={{
-            marginTop: '20px',
-            paddingTop: '14px',
-            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            fontSize: '0.74rem',
-            color: '#64748b',
-          }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <Shield size={13} color="#0d9488" />
-              Role-Based Access Control (RBAC)
-            </span>
-            <span>SIH26186 Defense Portal</span>
-          </div>
         </div>
       </div>
     </div>

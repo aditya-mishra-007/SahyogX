@@ -71,25 +71,36 @@ export default function RiskAnalytics() {
         {/* Row 1: Risk Distribution + Risk Trend */}
         <div className={styles.chartsGrid}>
           <ChartCard title="Welfare Risk Distribution" subtitle="Current personnel by risk level">
-            <ResponsiveContainer width="100%" height={260}>
+            <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
                   data={analytics.risk_distribution}
                   dataKey="value"
                   nameKey="name"
                   cx="50%"
-                  cy="50%"
-                  outerRadius={90}
-                  innerRadius={50}
-                  paddingAngle={3}
-                  label={({ name, value }) => `${value}`}
+                  cy="45%"
+                  outerRadius={95}
+                  innerRadius={60}
+                  paddingAngle={4}
+                  label={({ cx, cy, midAngle, innerRadius, outerRadius, value, name }) => {
+                    const RADIAN = Math.PI / 180;
+                    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+                    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                    return value > 0 ? (
+                      <text x={x} y={y} fill="#fff" textAnchor="middle" dominantBaseline="central" fontSize={14} fontWeight={600}>
+                        {value}
+                      </text>
+                    ) : null;
+                  }}
+                  labelLine={false}
                 >
                   {analytics.risk_distribution.map((entry, i) => (
-                    <Cell key={i} fill={entry.fill} />
+                    <Cell key={i} fill={entry.fill} stroke="rgba(255,255,255,0.1)" strokeWidth={2} />
                   ))}
                 </Pie>
                 <Tooltip contentStyle={tooltipStyle} />
-                <Legend />
+                <Legend verticalAlign="bottom" height={36} iconType="circle" />
               </PieChart>
             </ResponsiveContainer>
           </ChartCard>
