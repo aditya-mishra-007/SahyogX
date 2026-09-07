@@ -57,6 +57,14 @@ _PHASE1_DEV_USERS: Dict[str, UserInDB] = {
         full_name="Hav. K. Singh",
         is_active=True,
     ),
+    "sf-882914": UserInDB(
+        id="usr-882914",
+        username="sf-882914",
+        password_hash=get_password_hash("ServicePass@2026"),
+        role=UserRole.PERSONNEL,
+        full_name="Havildar Rajesh Kumar",
+        is_active=True,
+    ),
 }
 
 

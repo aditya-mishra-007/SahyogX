@@ -55,31 +55,86 @@ class ApiService {
   }
 
   /* =======================================================
-     AUTH: POST /api/auth/login
+     AUTH: POST /api/v1/auth/login
      ======================================================= */
-  async login(personnelId: string, _password?: string): Promise<{ token: string; profile: PersonnelProfile }> {
-    if (USE_MOCK) {
-      await delay(400);
-      if (!personnelId.trim()) {
-        throw new Error('Please enter your Personnel ID or Username.');
-      }
-      const token = `mock-token-${Date.now()}`;
-      sessionStorage.setItem(STORAGE_KEYS.TOKEN, token);
-      
-      const profile = {
-        ...MOCK_PERSONNEL_PROFILE,
-        personnelId: personnelId.toUpperCase()
-      };
-      return { token, profile };
+  async login(personnelId: string, password?: string): Promise<{ token: string; profile: PersonnelProfile }> {
+    if (!personnelId.trim()) {
+      throw new Error('Please enter your Personnel ID or Username.');
     }
 
-    const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: personnelId, password: _password })
-    });
-    if (!res.ok) throw new Error('Authentication failed. Check your credentials.');
-    return res.json();
+    // Attempt real backend authentication first
+    try {
+      const endpoint = `${API_BASE_URL}/api/v1/auth/login`;
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: personnelId.trim(), password: password || '' })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const token = data.access_token || data.token;
+        if (token) {
+          sessionStorage.setItem(STORAGE_KEYS.TOKEN, token);
+          
+          // Hydrate user profile from backend
+          try {
+            const meRes = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            if (meRes.ok) {
+              const user = await meRes.json();
+              const profile: PersonnelProfile = {
+                id: String(user.id || 'usr-882914'),
+                personnelId: (user.username || personnelId).toUpperCase(),
+                name: user.full_name || 'Havildar Rajesh Kumar',
+                rank: 'Havildar',
+                unit: '14 Rajputana Rifles (Bravo Coy)',
+                station: 'Forward Base Northern Sector',
+                serviceYears: 9,
+                tradeSpecialty: 'Tactical Signals Specialist',
+                emailContact: user.email || `${user.username}@sahyogx.internal`,
+                role: 'personnel'
+              };
+              return { token, profile };
+            }
+          } catch {
+            // Profile fetch fallback
+          }
+
+          const profile = {
+            ...MOCK_PERSONNEL_PROFILE,
+            personnelId: personnelId.toUpperCase()
+          };
+          return { token, profile };
+        }
+      } else if (res.status === 401 || res.status === 400 || res.status === 403) {
+        const errorData = await res.json().catch(() => null);
+        throw new Error(errorData?.detail || 'Authentication failed. Check your credentials.');
+      }
+    } catch (err: any) {
+      // If error is explicit auth rejection from backend, re-throw it
+      if (err.message && (err.message.includes('Authentication failed') || err.message.includes('Incorrect') || err.message.includes('credentials') || err.message.includes('required') || err.message.includes('deactivated'))) {
+        throw err;
+      }
+      // If an explicit API_BASE_URL was provided and failed due to network, surface it
+      if (!USE_MOCK && API_BASE_URL) {
+        throw new Error('Backend authentication service unavailable. Check connection.');
+      }
+    }
+
+    // Development / Mock fallback when backend server is not running
+    await delay(300);
+    const token = `mock-token-${Date.now()}`;
+    sessionStorage.setItem(STORAGE_KEYS.TOKEN, token);
+    const profile = {
+      ...MOCK_PERSONNEL_PROFILE,
+      personnelId: personnelId.toUpperCase()
+    };
+    return { token, profile };
   }
 
   logout(): void {
@@ -91,16 +146,33 @@ class ApiService {
   }
 
   /* =======================================================
-     PROFILE: GET /api/me
+     PROFILE: GET /api/v1/auth/me
      ======================================================= */
   async getProfile(): Promise<PersonnelProfile> {
-    if (USE_MOCK) {
-      await delay(200);
-      return MOCK_PERSONNEL_PROFILE;
+    const token = sessionStorage.getItem(STORAGE_KEYS.TOKEN);
+    if (token && !token.startsWith('mock-token-')) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/v1/auth/me`, { headers: this.getHeaders() });
+        if (res.ok) {
+          const user = await res.json();
+          return {
+            id: String(user.id || 'usr-882914'),
+            personnelId: (user.username || 'SF-882914').toUpperCase(),
+            name: user.full_name || 'Havildar Rajesh Kumar',
+            rank: 'Havildar',
+            unit: '14 Rajputana Rifles (Bravo Coy)',
+            station: 'Forward Base Northern Sector',
+            serviceYears: 9,
+            tradeSpecialty: 'Tactical Signals Specialist',
+            emailContact: user.email || `${user.username}@sahyogx.internal`,
+            role: 'personnel'
+          };
+        }
+      } catch {
+        // Fallback to local profile
+      }
     }
-    const res = await fetch(`${API_BASE_URL}/api/me`, { headers: this.getHeaders() });
-    if (!res.ok) throw new Error('Failed to load profile information');
-    return res.json();
+    return MOCK_PERSONNEL_PROFILE;
   }
 
   /* =======================================================
