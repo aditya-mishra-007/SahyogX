@@ -1,285 +1,206 @@
-# SahyogX — Backend Service
+# 🇮🇳 SahyogX — AI-Based Predictive Personnel Stress & Welfare Monitoring System
 
-> **SIH Problem Statement:** AI-Based Predictive Personnel Stress and Welfare Monitoring System for Uniformed Forces  
-> **Repository Branch:** `backend`  
-> **Phase Completed:** **Phase 5 — Security Compliance, Audit Logging, Data Export & End-to-End Hardening**
-
----
-
-## 1. Overview
-
-**SahyogX Backend** is an asynchronous, high-throughput REST API engineered with **FastAPI**, **SQLAlchemy 2.0 (Async)**, and **PostgreSQL 17**. It acts as the secure intelligence and data core for monitoring personnel welfare, operational workload, deployment rotations, predictive stress evaluation, automated early warning alert triage, force-wide battalion analytics, immutable audit trails, and data-minimized tactical reporting across uniformed forces.
+> **Smart India Hackathon (SIH)** | **Problem Statement:** AI-Based Predictive Personnel Stress and Welfare Monitoring System for Uniformed Forces  
+> **Live Web Portal (Vercel):** [SahyogX Production Portal](https://sahyog-x.vercel.app) *(or your Vercel URL)*  
+> **Live API Backend (Render):** [`https://sahyog-x.onrender.com`](https://sahyog-x.onrender.com)  
+> **Interactive API Documentation:** [`https://sahyog-x.onrender.com/docs`](https://sahyog-x.onrender.com/docs)  
 
 ---
 
-## 2. Architecture & Modules
+## 🎖️ Executive Summary
 
-```text
-src/
-├── main.py                       # FastAPI application entry point, CORS, security middleware, exception handlers
-├── core/
-│   ├── config.py                 # Pydantic BaseSettings loaded from .env & ML model paths
-│   ├── database.py               # Async engine, sessionmaker & connection health ping
-│   ├── logging.py                # Centralized application logging
-│   ├── security.py               # bcrypt password hashing & signed PyJWT tokens
-│   └── security_headers.py       # OWASP security response headers middleware (HSTS, CSP, X-Frame-Options)
-├── api/
-│   ├── deps.py                   # Authentication & RBAC dependency injectors (DB lookup + fallback)
-│   ├── routes/
-│   │   ├── auth.py               # /api/v1/auth (Login & User Profile with audit logging)
-│   │   ├── health.py             # /health, /api/health & /api/health/ready (Readiness Probes)
-│   │   ├── personnel.py          # /api/v1/personnel (Directory & Service Records)
-│   │   ├── deployments.py        # /api/v1/deployments (Postings & Hardship Tracking)
-│   │   ├── duty.py               # /api/v1/duty (Shift Workload & Night Patrols)
-│   │   ├── leaves.py             # /api/v1/leaves (Applications & Approvals)
-│   │   ├── surveys.py            # /api/v1/surveys (Confidential Clinical Screenings)
-│   │   ├── predictions.py        # /api/v1/predictions (ML & Heuristic Stress Evaluation)
-│   │   ├── alerts.py             # /api/v1/alerts (Early Warning Alerts & Triage)
-│   │   ├── analytics.py          # /api/v1/analytics (Unit Heatmaps & Theatre Metrics)
-│   │   ├── audit.py              # /api/v1/audit/logs (Forensic Security Audit Logs)
-│   │   ├── export.py             # /api/v1/export (Tactical Unit & Alert CSV/JSON Exports)
-│   │   └── test_rbac.py          # Verification routes for role testing
-│   └── v1/
-│       └── router.py             # V1 Aggregator Router (39 registered API paths)
-├── models/                       # SQLAlchemy 2.0 Async ORM Models
-│   ├── base.py                   # Base DeclarativeBase and TimestampMixin
-│   ├── user.py                   # User system authentication accounts table
-│   ├── personnel.py              # Personnel table
-│   ├── deployment.py             # Deployments table
-│   ├── duty.py                   # Duty logs table
-│   ├── leave.py                  # Leave records table
-│   ├── survey.py                 # Wellness surveys table
-│   ├── alert.py                  # Early warning alerts table
-│   └── audit.py                  # Append-only security audit log table
-├── schemas/                      # Pydantic v2 Request / Response DTOs
-│   ├── auth.py
-│   ├── user.py
-│   ├── personnel.py
-│   ├── deployment.py
-│   ├── duty.py
-│   ├── leave.py
-│   ├── survey.py
-│   ├── prediction.py             # Feature vectors & stress prediction responses
-│   ├── alert.py                  # Alert lifecycle, triage payloads & interventions
-│   ├── analytics.py              # Unit heatmaps, theatre metrics & welfare summaries
-│   ├── audit.py                  # Audit log query and event responses
-│   └── export.py                 # Tactical export metadata & record envelopes
-└── services/                     # Business Logic Layer
-    ├── auth_service.py           # Hybrid authentication (PostgreSQL users + seed fallback)
-    ├── personnel_service.py
-    ├── deployment_service.py
-    ├── duty_service.py
-    ├── leave_service.py
-    ├── survey_service.py
-    ├── feature_aggregator.py     # Aggregates 19 domain signals into ML feature representations
-    ├── prediction_service.py     # Unified prediction orchestrator & unit analytics
-    ├── alert_service.py          # Automated threshold scanning, deduplication & resolution
-    ├── analytics_service.py      # Multi-unit heatmaps, theatre distributions & deep-dives
-    ├── audit_service.py          # Append-only audit logging with credential sanitization
-    ├── export_service.py         # RFC 4180 CSV & JSON tactical exports with PII redaction
-    └── predictors/               # Predictive Risk Engines
-        ├── base.py               # BaseStressPredictor abstract contract
-        ├── heuristic.py          # Deterministic explainable baseline predictor
-        └── ml_adapter.py         # External trained model artifact adapter
-alembic/                          # Database migration scripts (Phases 2, 4, and 5)
-scripts/                          # Synthetic defense dataset generator
-tests/                            # Automated test suite (66 unit, integration, and e2e tests)
+Uniformed service personnel (Armed Forces, Central Armed Police Forces, State Police) operate in demanding environments involving high operational tempo, extreme terrain, isolation from family, disrupted circadian rhythms, and prolonged deployment cycles.
+
+**SahyogX** is an end-to-end, privacy-respecting, AI-driven personnel welfare platform. It synthesizes operational telemetry (duty rosters, night sentry hours, continuous field deployments, leave deficits) with voluntary confidential wellness screenings to proactively detect psychological strain, burnout, and acute fatigue **before** they manifest into crises.
+
+---
+
+## 🏛️ System Architecture
+
+```mermaid
+graph TD
+    subgraph Client ["Client Layer (React 19 + TypeScript + Vite)"]
+        UI_Personnel["Personnel Self-Service Portal"]
+        UI_Officer["Unit Medical & Welfare Officer Dashboard"]
+        UI_Commander["Battalion / Theatre Commander View"]
+    end
+
+    subgraph Edge ["Edge & CDN"]
+        Vercel["Vercel Global Edge Network (SPA Routing)"]
+    end
+
+    subgraph API ["Backend Layer (FastAPI Asynchronous Core)"]
+        Router["API Gateway / Router (/api/v1)"]
+        Auth["JWT Auth & Role-Based Access Control (RBAC)"]
+        Security["OWASP Security Headers & Audit Logging"]
+        Predictor["AI/ML Stress Predictive Engine (19 Signals)"]
+        Alerts["Automated Alert Triage & Notification Engine"]
+        Analytics["Battalion Risk Heatmaps & Tactical Metrics"]
+    end
+
+    subgraph Database ["Persistence Layer"]
+        Supabase["Supabase Cloud PostgreSQL 17 (Pooler Connection)"]
+        Tables["Personnel, Deployments, Duty, Leaves, Surveys, Alerts, Audit"]
+    end
+
+    UI_Personnel --> Vercel
+    UI_Officer --> Vercel
+    UI_Commander --> Vercel
+    Vercel --> Router
+    Router --> Auth
+    Auth --> Security
+    Security --> Predictor
+    Security --> Alerts
+    Security --> Analytics
+    Predictor --> Database
+    Alerts --> Database
+    Analytics --> Database
+    Database --> Supabase
 ```
 
 ---
 
-## 3. Database Schema (PostgreSQL 17)
+## 🌟 Key Features & Capabilities
 
-| Table Name | Description | Key Attributes | Constraints & Indexes |
+### 1. 🛡️ Multi-Tier Role-Based Access Control (RBAC)
+* **Personnel / Jawan Role:** Access to personal wellness log, confidential mood surveys, shift workloads, leave balance, peer recovery resources, and self-help tools.
+* **Medical / Welfare Officer Role:** Unit-wide roster triage, clinical screening scores, intervention tracking, medical follow-up scheduling, and confidential alerts.
+* **Commander / Battalion Head Role:** High-level strategic heatmaps, high-stress outlier alerts, unit combat-readiness index, operational hardship distribution, and anonymized aggregate reports.
+
+### 2. 🤖 AI-Powered Stress Prediction Engine
+* **19 Tactical Signals Evaluated:** Analyzes continuous deployment hardship, night duties, rest gaps, leave denial frequency, physical strain indices, and psychological screening responses.
+* **Dual Prediction Pipeline:**
+  * **Machine Learning Model:** Random Forest / Gradient Boosting trained classifier for non-linear risk classification (`LOW`, `MODERATE`, `HIGH`, `CRITICAL`).
+  * **Deterministic Heuristic Engine:** Explainable fallback providing human-auditable risk scoring with detailed contributing factors.
+* **Confidence & Anomaly Scoring:** Quantifies prediction confidence alongside risk level to assist decision-makers.
+
+### 3. 🚨 Early Warning & Automated Triage
+* **Dynamic Trigger Thresholds:** Automatically generates alerts when fatigue indicators cross safety thresholds (e.g., >14 continuous duty days or severe sleep disruption).
+* **Intervention Lifecycle Tracking:** Alerts progress through `NEW` ➔ `ACKNOWLEDGED` ➔ `UNDER_REVIEW` ➔ `RESOLVED`.
+* **Actionable Recommendations:** Suggests mandatory rest cycles, leave approvals, counselor referrals, or posting rotation adjustments.
+
+### 4. 📊 Battalion Heatmaps & Tactical Analytics
+* Visual risk distributions by unit, company, and theatre of operation.
+* Correlation matrices linking duty hours to elevated stress indicators.
+* Zero-latency client-side caching with smooth Recharts visualizations.
+
+### 5. 🔒 Defense-Grade Security & Audit Compliance
+* **Data Minimization & PII Redaction:** Aggregate commander dashboards display unit-level statistics without exposing private medical survey details.
+* **Immutable Security Audit Trail:** Append-only database logs recording every login, record export, triage action, and role escalation.
+* **OWASP Hardening:** HSTS (`max-age=31536000`), Content Security Policy (`CSP`), `X-Frame-Options: DENY`, and `X-Content-Type-Options: nosniff`.
+
+---
+
+## 🗄️ Database Schema & Entities
+
+| Table | Description | Key Attributes |
+| :--- | :--- | :--- |
+| `users` | System login credentials & role identities | `id`, `username`, `password_hash`, `role`, `is_active`, `last_login_at` |
+| `personnel` | Uniformed force member profile & credentials | `service_number`, `name`, `rank`, `unit`, `role`, `status` |
+| `deployments` | Operational field assignments & hardship postings | `location`, `deployment_type`, `hardship_index`, `start_date`, `end_date` |
+| `duty_logs` | Shift work records & night patrol logs | `duty_date`, `duty_type`, `hours_worked`, `night_duty`, `consecutive_days` |
+| `leave_records`| Annual, casual, and medical leave history | `leave_type`, `start_date`, `end_date`, `status`, `approval_date` |
+| `wellness_surveys` | Clinical wellness self-assessments | `stress_score`, `sleep_quality`, `fatigue_score`, `wellbeing_score` |
+| `alerts` | Automated risk warnings & triage events | `risk_level`, `trigger_source`, `status`, `assigned_officer`, `resolution_notes` |
+| `audit_logs` | Forensic security and activity audit log | `user_id`, `action`, `resource_type`, `ip_address`, `timestamp` |
+
+---
+
+## 💻 Tech Stack
+
+### Frontend
+- **Framework:** React 19, TypeScript
+- **Bundler & Build Tool:** Vite 8
+- **Styling:** Modular CSS Design System with Dark/Light Glassmorphism Theme
+- **Data Visualization:** Recharts, Lucide Icons
+- **Routing:** React Router DOM v7 (SPA Rewrite Enabled)
+- **Deployment Platform:** Vercel Global Edge Network
+
+### Backend
+- **Framework:** FastAPI (Python 3.11+)
+- **ORM & Database Layer:** SQLAlchemy 2.0 (AsyncIO), Alembic Migrations
+- **Database Engine:** PostgreSQL 17 (Supabase Cloud with Session Pooler)
+- **Authentication:** PyJWT (HS256 tokens), bcrypt password hashing
+- **Data Validation:** Pydantic v2 Settings & Schemas
+- **Deployment Platform:** Render Cloud Platform
+
+---
+
+## 🚀 Live Demo Access & Test Credentials
+
+You can test all 3 personas using pre-seeded test accounts:
+
+| Role | Username | Password | Intended Dashboard |
 | :--- | :--- | :--- | :--- |
-| `users` | System authentication & role identities | `id`, `username`, `password_hash`, `role`, `full_name`, `is_active`, `last_login_at` | `username` UNIQUE, Indexed; Composite index on (`role`, `is_active`) |
-| `personnel` | Uniformed personnel service records | `id`, `service_number`, `name`, `rank`, `role`, `unit`, `joining_date`, `status` | `service_number` UNIQUE, Indexed; Composite index on (`unit`, `rank`) |
-| `deployments` | Field postings & operational hardship | `id`, `personnel_id`, `location`, `deployment_type`, `start_date`, `end_date`, `operational_intensity`, `status` | FK to `personnel.id` (CASCADE); Indexed on `personnel_id`, `start_date` |
-| `duty_logs` | Daily workload shifts & night sentry | `id`, `personnel_id`, `duty_date`, `duty_type`, `hours_worked`, `night_duty`, `consecutive_duty_days`, `workload_score` | FK to `personnel.id` (CASCADE) |
-| `leave_records` | Leave requests & deficit tracking | `id`, `personnel_id`, `leave_type`, `start_date`, `end_date`, `duration_days`, `status`, `reason` | FK to `personnel.id` (CASCADE) |
-| `wellness_surveys`| Psychological & stress screenings | `id`, `personnel_id`, `survey_date`, `stress_score`, `sleep_quality_score`, `fatigue_score`, `wellbeing_score` | FK to `personnel.id` (CASCADE) |
-| `alerts` | Early Warning System (EWS) triage records | `id`, `personnel_id`, `risk_score`, `risk_category`, `trigger_type`, `title`, `severity`, `status`, `recommended_action`, `resolution_notes`, `resolved_by`, `resolved_at` | FK to `personnel.id` (CASCADE); Indexed on (`status`, `severity`), (`personnel_id`, `status`), `created_at` |
-| `audit_logs` | Append-only security & audit trail | `id`, `user_id`, `user_role`, `action`, `resource_type`, `resource_id`, `ip_address`, `details`, `created_at` | Indexed on `action`, `user_id`, `created_at`, (`action`, `created_at`), (`user_id`, `created_at`) |
+| **Battalion Commander** | `commander_sharma` | `SahyogX@2026` | Strategic Unit Heatmap & Early Alerts |
+| **Medical / Welfare Officer** | `officer_verma` | `SahyogX@2026` | Clinical Roster, Triage & Interventions |
+| **Service Personnel** | `sepoy_kumar` | `SahyogX@2026` | Confidential Self-Check, Duty & Leave Log |
 
 ---
 
-## 4. Role-Based Access Control (RBAC) Matrix
+## 🛠️ Local Development Setup
 
-| Endpoint Area | Method | `COMMANDER` | `MEDICAL_OFFICER` | `PERSONNEL` | Privacy & Confidentiality Rule |
-| :--- | :--- | :---: | :---: | :---: | :--- |
-| `/api/v1/personnel` | `GET` | ✅ | ✅ | ✅ | View personnel directory / profiles |
-| `/api/v1/personnel` | `POST / PATCH / DELETE` | ✅ | ❌ | ❌ | Administrative personnel creation & modification |
-| `/api/v1/deployments` | `GET` | ✅ | ✅ | ✅ | View field deployments and rotational assignments |
-| `/api/v1/deployments` | `POST / PATCH` | ✅ | ❌ | ❌ | Postings assigned exclusively by Unit Commander |
-| `/api/v1/duty` | `GET / POST` | ✅ | ✅ | ✅ | Log daily shifts and view operational workloads |
-| `/api/v1/duty/.../summary` | `GET` | ✅ | ✅ | ✅ | Workload metrics, cumulative night shifts & fatigue |
-| `/api/v1/leaves` | `GET / POST` | ✅ | ✅ | ✅ | Submit applications & view leave records |
-| `/api/v1/leaves/{id}` | `PATCH` | ✅ | ✅ | ❌ | Approve or reject leave applications |
-| `/api/v1/surveys` | `POST` | ❌ | ✅ | ✅ | Personnel submit self-assessments; Medics submit on duty |
-| `/api/v1/surveys` | `GET` | ❌ | ✅ | ❌ | **Protected:** Raw clinical notes restricted to Medical Officers |
-| `/api/v1/surveys/.../summary` | `GET` | ✅ | ✅ | ❌ | Aggregated wellness indices & calculated stress risk levels |
-| `/api/v1/predictions/personnel/{id}` | `GET` | ✅ | ✅ | ✅ (Own Only) | Predict stress risk; Personnel strictly restricted to own record |
-| `/api/v1/predictions/unit/{unit}` | `GET` | ✅ | ✅ | ❌ | Unit-level stress risk distribution & battalion averages |
-| `/api/v1/predictions/model-status` | `GET` | ✅ | ✅ | ✅ | Active prediction engine diagnostics & telemetry |
-| `/api/v1/alerts` | `GET` | ✅ | ✅ | ❌ | Alert triage queue; Personnel cannot view other soldiers' alerts |
-| `/api/v1/alerts/scan` | `POST` | ✅ | ✅ | ❌ | Trigger automated force-wide risk threshold scan |
-| `/api/v1/alerts/{id}` | `GET` | ✅ | ✅ | ✅ (Own Only) | Alert detail and recommendations; Personnel can view own alert |
-| `/api/v1/alerts/{id}/status` | `PATCH` | ✅ | ✅ | ❌ | Acknowledge alert or transition lifecycle status |
-| `/api/v1/alerts/{id}/resolve` | `POST` | ✅ | ✅ | ❌ | Formally resolve alert with mitigation audit trail |
-| `/api/v1/analytics/heatmap` | `GET` | ✅ | ✅ | ❌ | Force-wide multi-unit stress risk heatmap |
-| `/api/v1/analytics/theatres` | `GET` | ✅ | ✅ | ❌ | Deployment risk distribution by operational theatre |
-| `/api/v1/analytics/unit/.../summary`| `GET` | ✅ | ✅ | ❌ | Battalion welfare deep-dive profile and deprivation rates |
-| `/api/v1/audit/logs` | `GET` | ✅ | ❌ | ❌ | **Protected:** Forensic access & system modification audit trail |
-| `/api/v1/export/unit/{unit}/csv` | `GET` | ✅ | ✅ | ❌ | Tactical battalion readiness report with clinical PII redacted |
-| `/api/v1/export/unit/{unit}/json` | `GET` | ✅ | ✅ | ❌ | Structured battalion welfare & risk data with export metadata |
-| `/api/v1/export/alerts/csv` | `GET` | ✅ | ✅ | ❌ | Historical & active EWS alerts report for offline contingency |
-| `/api/health/ready` | `GET` | ✅ | ✅ | ✅ | Deep readiness probe verifying database pool & ML engine state |
+### Prerequisites
+- Node.js 20+ & npm
+- Python 3.11+
+- PostgreSQL (Local or Supabase)
 
----
-
-## 5. Phase 3 — ML Bridge & Predictive Risk Engine
-
-### Architecture & Predictive Pipeline
-```text
-Personnel Records (Duty, Deployments, Leaves, Surveys)
-                      ↓
-           Feature Aggregator Layer
-                      ↓
-    PersonnelStressFeatures (19 ML Dimensions)
-                      ↓
-         Unified Prediction Service
-        ┌──────────────┴──────────────┐
-        ▼                             ▼
-[Primary] ML Model Adapter     [Fallback] Heuristic Predictor
-(Artifact discovery & load)    (Deterministic bounded formula)
-        └──────────────┬──────────────┘
-                       ↓
-        Validated StressPredictionResponse
-        - Risk Score: [0.000 - 1.000]
-        - Risk Category: LOW / MODERATE / HIGH / CRITICAL
-        - Confidence Score: [0.0 - 1.0]
-        - Primary Risk Factors (Explainable stress contributors)
+### 1. Clone the Repository
+```bash
+git clone https://github.com/aditya-mishra-007/SahyogX.git
+cd SahyogX
 ```
 
-### ML Model Artifact Status
-> [!NOTE]
-> **ML model artifact unavailable; system currently uses the deterministic heuristic fallback.**  
-> Inspection of `origin/ml` confirmed that the ML branch currently contains only an initial repository commit without trained model artifacts. The `MLModelStressPredictor` adapter is fully implemented with artifact discovery (`.joblib`, `.pkl`) and seamless fallback to `HeuristicStressPredictor`. When the ML team pushes a serialized model artifact to `artifacts/models/` or sets `ML_MODEL_PATH`, the backend will automatically discover and load it without code changes.
+### 2. Backend Setup
+```bash
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
-### Feature Aggregation (19 Machine Learning Dimensions)
-The feature aggregation layer transforms raw database records into a clean, normalized tabular feature vector (`PersonnelStressFeatures.to_vector()`):
-1. **Tenure**: `service_months`
-2. **Workload**: `recent_duty_hours`, `recent_night_duties`, `recent_max_consecutive_days`, `avg_workload_score`
-3. **Deployment**: `has_active_deployment`, `active_deployment_days`, `active_deployment_intensity`, `active_deployment_type`, `lifetime_hardship_deployments`
-4. **Recovery / Leave**: `days_since_last_leave`, `total_leave_days_past_year`, `rejected_leave_requests`
-5. **Clinical Screening**: `latest_stress_score`, `latest_sleep_quality_score`, `latest_fatigue_score`, `latest_wellbeing_score`, `avg_stress_score_past_90d`, `avg_sleep_score_past_90d`, `flagged_for_counselor`
-
-### Deterministic Heuristic Baseline Formulation
-The baseline evaluates 4 key operational welfare pillars:
-- **Pillar 1: Duty / Shift Workload (25%)** — High night sentry shifts, cumulative hours exceeding 180h/mo, and consecutive duty streaks.
-- **Pillar 2: Deployment Hardship (25%)** — Extreme operational intensity, high-altitude/counter-insurgency theatre, and long active posting (>90 days).
-- **Pillar 3: Leave Deprivation (20%)** — Time since last leave (>120 days), annual leave deficits (<20 days), and rejected leave requests.
-- **Pillar 4: Clinical Wellness (30%)** — Survey stress rating, chronic fatigue, sleep disruption, and counselor acute trigger flags. *(If surveys are absent, weight is dynamically redistributed across the other 3 operational pillars)*.
-
----
-
-## 6. Phase 4 — Early Warning System (EWS) & Unit Analytics
-
-### Alert Lifecycle & Triage
-```text
-[ NEW ] ──( Acknowledge )──► [ ACKNOWLEDGED ] ──( Review )──► [ IN_REVIEW ]
-   │                                                               │
-   └────────────────────( Resolve / Dismiss )─────────────────────┴────► [ RESOLVED / DISMISSED ]
-```
-- **Automated Scanning & Deduplication**: Scans active personnel with customizable risk thresholds (default $\ge 0.60$ or clinical counselor referral). Automatically suppresses duplicate alerts if an active alert for that soldier was generated within the 7-day cooldown window.
-- **Intervention Recommendations**: Generates actionable mitigations tailored to trigger factors:
-  - *Duty Overload*: 48-hour rest cycle and mandatory day shift rotation.
-  - *Hardship Deployment*: Mid-deployment recuperation or rotational relief.
-  - *Leave Deprivation*: Expedited sanction of 10–14 days Annual/Casual Leave.
-  - *Clinical Distress*: Direct consultation with Regimental Medical Officer (RMO) / Counselor.
-- **Audit Logging**: Mandatory resolution notes, action taken, resolving officer username, and UTC timestamp recorded upon resolution.
-
-### Force-Wide Unit Analytics & Heatmaps
-- **Multi-Unit Stress Heatmap** (`/api/v1/analytics/heatmap`): Compares risk distribution across all battalions, identifying the most vulnerable units, active critical alert counts, and force-wide average scores.
-- **Operational Theatres** (`/api/v1/analytics/theatres`): Analyzes deployed troops grouped by geographic theatre (Siachen, Kupwara, Thar, etc.) and terrain difficulty (High Altitude, Counter-Insurgency, Border Outpost).
-- **Battalion Deep-Dive** (`/api/v1/analytics/unit/{unit}/summary`): Comprehensive unit profiles detailing 30-day duty averages, night shifts, leave deprivation rates, and active alert severity breakdowns.
-
----
-
-## 7. Phase 5 — Security Hardening, Audit Trail & Data Export
-
-### Security Response Headers (OWASP Hardening)
-Every HTTP response is fortified via `SecurityHeadersMiddleware`:
-- `X-Frame-Options: DENY` (prevents clickjacking via malicious framing)
-- `X-Content-Type-Options: nosniff` (mitigates MIME-sniffing exploits)
-- `Strict-Transport-Security: max-age=31536000; includeSubDomains` (enforces HTTPS transport)
-- `Referrer-Policy: strict-origin-when-cross-origin` (prevents sensitive URL leakage)
-- `Content-Security-Policy` (strictly controls asset origins while allowing interactive Swagger UI documentation)
-
-### Append-Only Security & Operational Audit Trail
-The `audit_logs` table records forensic operational activity:
-- Authentication events (`LOGIN_SUCCESS`, `LOGIN_FAILURE`)
-- Data export actions (`DATA_EXPORT_CSV`, `DATA_EXPORT_JSON`)
-- Alert triage lifecycle events (`ALERT_ACKNOWLEDGE`, `ALERT_RESOLVE`)
-- Automated credential sanitization: dictionary detail payloads automatically redact sensitive keys (`password`, `token`, `secret`, `authorization`, `credential`).
-- Query endpoint `GET /api/v1/audit/logs` restricted exclusively to authorized **Commanders**.
-
-### Tactical Data Export & Clinical PII Scrubbing
-Field commanders and medical officers can export unit operational metrics and alert registers:
-- **Unit CSV Export** (`/api/v1/export/unit/{unit}/csv`): Returns an RFC 4180 CSV file attachment.
-- **Unit JSON Export** (`/api/v1/export/unit/{unit}/json`): Structured data payload with export compliance metadata (`exported_by`, `data_classification`, `pii_redacted: True`).
-- **Privacy Enforcement**: Free-text clinical screening remarks and psychiatrist consultation notes are completely omitted from unit exports to protect soldier confidentiality.
-- **Alerts CSV Export** (`/api/v1/export/alerts/csv`): Filtered alert logs for operational reviews.
-
-### Deep Readiness Probe (`/api/health/ready`)
-Verifies live database connectivity via active query execution (`SELECT 1`) alongside ML engine status, returning HTTP 200 (`"status": "READY"`) when operational, or HTTP 503 (`"status": "NOT_READY"`) if the database pool is unreachable.
-
----
-
-## 8. Local Setup & Execution
-
-### Step 1: Install Dependencies
-Ensure your virtual environment is active:
-```powershell
+# Install dependencies
 pip install -r requirements.txt
-```
 
-### Step 2: Configure Environment
-Copy `.env.example` to `.env` and set your local PostgreSQL 17 credentials:
-```env
-POSTGRES_SERVER=localhost
-POSTGRES_PORT=5432
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=YOUR_POSTGRES_PASSWORD
-POSTGRES_DB=sahyogx
-```
+# Configure environment variables
+cp .env.example .env
+# Update .env with your local PostgreSQL or Supabase DATABASE_URL
 
-### Step 3: Run Database Migrations
-```powershell
-alembic upgrade head
+# Launch backend API server
+uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
 ```
+API Documentation will be live at `http://localhost:8000/docs`.
 
-### Step 4: Seed Synthetic Defense Data
-```powershell
-python -m scripts.seed_synthetic_data
-```
+### 3. Frontend Setup
+```bash
+# Install frontend dependencies
+npm install
 
-### Step 5: Start the Development Server
-```powershell
-python -m uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+# Start Vite development server
+npm run dev
 ```
-* **Interactive Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs)
-* **ReDoc Documentation:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
-* **API Health Check:** [http://localhost:8000/health](http://localhost:8000/health)
-* **Deep Readiness Probe:** [http://localhost:8000/api/health/ready](http://localhost:8000/api/health/ready)
+Open `http://localhost:5173` to explore the user portal.
 
 ---
 
-## 9. Running Automated Tests
+## 🌐 Production Deployment Guide
 
-Run the complete automated test suite (66 tests across all 5 phases):
-```powershell
-pytest -v
-```
+### Backend (Render)
+1. Link repository to Render Web Service.
+2. Build Command: `pip install -r requirements.txt`
+3. Start Command: `uvicorn src.main:app --host 0.0.0.0 --port $PORT`
+4. Environment Variables:
+   - `DATABASE_URL`: Supabase IPv4 Pooler connection string (`postgresql://postgres.[ref]:[pwd]@...pooler.supabase.com:5432/postgres`)
+   - `JWT_SECRET_KEY`: Strong random secret key
+   - `CORS_ORIGINS`: `*` or your Vercel frontend URL
 
-All **66 tests** validate database constraints, CRUD operations, date logic, input validations, strict RBAC confidentiality boundaries, feature aggregation robustness, heuristic risk bounds, ML adapter fallback behaviors, Early Warning alert deduplication, lifecycle triage transitions, security response headers, deep readiness probes, login audit trails, credential sanitization, tactical CSV/JSON exports with PII minimization, and end-to-end mission workflows.
+### Frontend (Vercel)
+1. Import repository into Vercel.
+2. Framework Preset: **Vite**.
+3. Environment Variables:
+   - `VITE_API_BASE_URL`: `https://sahyog-x.onrender.com`
+4. Deploy — static assets are distributed globally via CDN with SPA rewrite routing handled via `vercel.json`.
+
+---
+
+## 📜 License & Acknowledgements
+Developed with pride for the **Smart India Hackathon (SIH)** to serve the personnel of our armed forces and security agencies.
+All rights reserved © 2026 Team SahyogX.
