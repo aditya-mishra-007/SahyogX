@@ -1,18 +1,13 @@
-# Ignore backend Python files during Vercel frontend build
+# Ignore backend Python files and tools, keep all frontend TypeScript/JavaScript/CSS
 requirements.txt
 pyproject.toml
 pyrefly.toml
 pytest.ini
+.flake8
+.venv/
 alembic/
 alembic.ini
 backend/
 ml/
 tests/
-.venv/
-src/api/routes/
-src/core/
-src/db/
-src/models/
-src/schemas/
-src/services/
-src/main.py
+**/*.py
